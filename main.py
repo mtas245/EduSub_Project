@@ -1,6 +1,4 @@
-import app
-import nicegui
-from nicegui import ui
+from nicegui import ui, app
 
 from database import engine, Base
 
