@@ -67,20 +67,57 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 ![UML Use Case Diagram](docs/architecture-diagrams/uml_use_case_diagram.png)
 
 **Use cases**
-– Login (All users)
-– Create Substitute Request (School Manager)
-– View Open Requests (Substitute Teacher)
-– Accept Substitute Request (Substitute Teacher)
-– View Accepted Assignments (Substitute Teacher)
-– View Request Status (School Manager)
-– Cancel Substitute Request (School Manager)
-– Manage Users and Roles (Admin)
-– View Assignment History (Admin)
+
+1. **Login (All Users)**  
+   Users log into the system using email and password.  
+   → System authenticates user and redirects to the correct dashboard.
+
+2. **Register Account (Visitor)**  
+   A new user creates an account by entering personal details and selecting a role.  
+   → Account is stored in the system.
+
+3. **Create Substitute Request (School Manager)**  
+   School Manager creates a request for a substitute teacher.  
+   → Request becomes visible to substitute teachers.
+
+4. **View Open Requests (Substitute Teacher)**  
+   Substitute Teacher views available substitute requests.  
+   → List of open requests is displayed.
+
+5. **Accept Substitute Request (Substitute Teacher)**  
+   Substitute Teacher accepts a request.  
+   → Request is assigned to the teacher.
+
+6. **View Accepted Assignments (Substitute Teacher)**  
+   Substitute Teacher views all accepted assignments.  
+   → Personal assignment list is shown.
+
+7. **View Request Status (School Manager)**  
+   School Manager checks the status of requests.  
+   → Status (open, accepted, completed) is displayed.
+
+8. **Cancel Substitute Request (School Manager)**  
+   School Manager cancels an existing request.  
+   → Request is removed or marked as cancelled.
+
+9. **Manage Users and Roles (Admin)**  
+   Admin creates, updates, or deletes users and roles.  
+   → System user data is updated.
+
+10. **View Assignment History (Admin)**  
+    Admin reviews past assignments and system activity.  
+    → Historical data is displayed.
 
 **Actors**
-– School Manager (creates substitute requests, manages and confirms assignments)
-– Substitute Teacher (views open requests, accepts assignments, manages own schedule)
-– Admin (manages users, roles, schools, and monitors system activity)
+
+**School Manager**  
+Creates substitute requests, manages and confirms assignments.
+
+**Substitute Teacher**  
+Views open requests, accepts assignments, and manages own schedule.
+
+**Admin**  
+Manages users, roles, schools, and monitors system activity.
 
 ---
 
