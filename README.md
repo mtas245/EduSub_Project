@@ -66,6 +66,9 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 
 ![UML Use Case Diagram](docs/architecture-diagrams/uml_use_case_diagram.png)
 
+<img width="480" height="813" alt="Bildschirmfoto 2026-03-23 um 13 17 25" src="https://github.com/user-attachments/assets/fcddd356-3ff6-4493-b692-5ee5b583e53c" />
+
+
 **Use cases**
 
 1. **Login (All Users)**  
