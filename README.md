@@ -173,8 +173,19 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 
 ![UML Use Case Diagram](docs/architecture-diagrams/uml_use_case_diagram.png)
 
-<img width="480" height="813" alt="Bildschirmfoto 2026-03-23 um 13 17 25" src="https://github.com/user-attachments/assets/fcddd356-3ff6-4493-b692-5ee5b583e53c" />
+<img width="480" height="813" alt="Bildschirmfoto 2026-03-23 um 13 17 25" src="https://github.com/user-attachments/assets/fcddd356-3ff6-4493-b692-5ee5b583e53c" />   
 
+
+**Actors**
+
+– **School Manager**  
+Creates substitute requests, manages and confirms assignments.
+
+– **Substitute Teacher**  
+Views open requests, accepts assignments, and manages own schedule.
+
+– **Admin**  
+Manages users, roles, schools, and monitors system activity.
 
 **Use cases**
 
@@ -217,17 +228,6 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 10. **View Assignment History (Admin)**  
     Admin reviews past assignments and system activity.  
     → Historical data is displayed.
-
-**Actors**
-
-**School Manager**  
-Creates substitute requests, manages and confirms assignments.
-
-**Substitute Teacher**  
-Views open requests, accepts assignments, and manages own schedule.
-
-**Admin**  
-Manages users, roles, schools, and monitors system activity.
 
 ---
 
