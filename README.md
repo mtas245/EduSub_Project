@@ -1,4 +1,4 @@
-# 🎒 EduSub – Teacher Substitute Management System
+# 🎒 EduMatch – Teacher Substitute Management System
 
 > 🚧 Replace the screenshot with one that shows your main screen.
 
