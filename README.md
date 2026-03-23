@@ -51,12 +51,119 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 
 ### User stories
 
-1.	As a school manager, I want to create a substitute request so that I can quickly find a replacement teacher.
-2.	As a substitute teacher, I want to see all open substitute requests so that I can choose suitable assignments.
-3.	As a substitute teacher, I want to accept a request so that the school knows I will take the assignment.
-4.	As a school manager, I want to see who accepted a request so that planning is reliable.
-5.	As an admin, I want to manage users and roles so that only authorized users access the system.
-6.	As the system, I want to prevent double bookings so that a substitute cannot accept overlapping assignments.
+1. **(Login)**
+   As a user, I want to log into the system so that I can access my personal dashboard.
+
+2. **(Create Substitute Request)**
+   As a school manager, I want to create a substitute request so that I can quickly find a replacement teacher.
+
+3. **(View Open Requests)**
+   As a substitute teacher, I want to see all open substitute requests so that I can choose suitable assignments.
+
+4. **(Accept Substitute Request)**
+   As a substitute teacher, I want to accept a request so that the school knows I will take the assignment.
+
+5. **(View Accepted Assignments)**
+   As a substitute teacher, I want to view my accepted assignments so that I can manage my schedule.
+
+6. **(View Request Status)**
+   As a school manager, I want to see who accepted a request so that planning is reliable.
+
+7. **(Cancel Substitute Request)**
+   As a school manager, I want to cancel a request so that outdated or unnecessary requests are removed.
+
+8. **(Manage Users and Roles)**
+   As an admin, I want to manage users and roles so that only authorized users can access the system.
+
+9. **(View Assignment History)**
+   As an admin, I want to view past assignments so that I can monitor system activity.
+
+10. **(Prevent Unauthorized Access / Conflicts)**
+    As the system, I want to prevent unauthorized access and double bookings so that security and scheduling are ensured.
+
+## Data Types
+**User**
+
+– id: int  
+– full_name: string   
+– email: string   
+– password: string   
+– role: enum (admin, school_manager, substitute_teacher)
+
+**Substitute Request**
+
+– id: int   
+– subject: string   
+– date: date   
+– status: string (open, accepted, cancelled, completed)   
+– created_by: int (user_id)
+
+**Assignment**
+
+– id: int   
+– request_id: int   
+– teacher_id: int   
+– status: string (assigned, completed)
+
+---
+
+## Inputs
+
+- **Login**
+  - email  
+  - password  
+
+- **Register**
+  - full_name  
+  - email  
+  - password  
+  - role  
+
+- **Create Substitute Request**
+  - subject  
+  - date  
+
+- **Accept Request**
+  - request_id  
+
+- **Cancel Request**
+  - request_id  
+
+---
+
+## Expected Outputs
+
+- **Login**
+  - Successful login → redirect to dashboard (admin / teacher / manager)  
+  - Failed login → error message ("Invalid email or password")
+
+- **Register**
+  - Success message → account created  
+  - Error message → invalid or missing input  
+
+- **Create Substitute Request**
+  - Request saved → visible to substitute teachers  
+
+- **View Open Requests**
+  - List of all available requests  
+
+- **Accept Request**
+  - Request assigned to teacher  
+  - Status updated to "accepted"  
+
+- **View Assignments**
+  - List of accepted assignments  
+
+- **Cancel Request**
+  - Request removed or marked as cancelled  
+
+- **Admin Actions**
+  - Updated user list  
+  - Updated system data  
+
+- **Security / Validation**
+  - Unauthorized access → redirect to login  
+  - Double booking → error message
 
 ---
 
