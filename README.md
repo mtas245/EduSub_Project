@@ -4,7 +4,7 @@
 
 ![UI Showcase](docs/ui-images/ui_showcase.png)
 
-EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
+EduMatch is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
 ---
 
 This project is intended to:
