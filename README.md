@@ -109,61 +109,61 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 
 ## Inputs
 
-- **Login**
-  - email  
-  - password  
+**Login**   
+– email   
+– password  
 
-- **Register**
-  - full_name  
-  - email  
-  - password  
-  - role  
+**Register**   
+– full_name   
+– email   
+– password   
+– role   
 
-- **Create Substitute Request**
-  - subject  
-  - date  
+**Create Substitute Request**   
+– subject   
+– date   
 
-- **Accept Request**
-  - request_id  
+**Accept Request**   
+– request_id   
 
-- **Cancel Request**
-  - request_id  
+**Cancel Request**   
+– request_id   
 
 ---
 
 ## Expected Outputs
 
-- **Login**
-  - Successful login → redirect to dashboard (admin / teacher / manager)  
-  - Failed login → error message ("Invalid email or password")
+**Login**   
+– Successful login → redirect to dashboard (admin / teacher / manager)   
+– Failed login → error message ("Invalid email or password")   
 
-- **Register**
-  - Success message → account created  
-  - Error message → invalid or missing input  
+**Register**   
+– Success message → account created   
+– Error message → invalid or missing input   
 
-- **Create Substitute Request**
-  - Request saved → visible to substitute teachers  
+**Create Substitute Request**   
+– Request saved → visible to substitute teachers   
 
-- **View Open Requests**
-  - List of all available requests  
+**View Open Requests**   
+– List of all available requests   
 
-- **Accept Request**
-  - Request assigned to teacher  
-  - Status updated to "accepted"  
+**Accept Request**   
+– Request assigned to teacher   
+– Status updated to "accepted"   
 
-- **View Assignments**
-  - List of accepted assignments  
+**View Assignments**   
+– List of accepted assignments   
 
-- **Cancel Request**
-  - Request removed or marked as cancelled  
+**Cancel Request**   
+– Request removed or marked as cancelled   
 
-- **Admin Actions**
-  - Updated user list  
-  - Updated system data  
+**Admin Actions**   
+– Updated user list   
+– Updated system data  
 
-- **Security / Validation**
-  - Unauthorized access → redirect to login  
-  - Double booking → error message
+**Security / Validation**   
+– Unauthorized access → redirect to login   
+– Double booking → error message   
 
 ---
 
