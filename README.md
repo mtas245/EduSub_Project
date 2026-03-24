@@ -479,9 +479,9 @@ pytest
 
 | Name      | Contribution |
 |-----------|--------------|
-| Student A | NiceGUI UI + documentation |
-| Student B | Database & ORM + documentation |
-| Student C | Business logic + documentation |
+| Ata Erduran | Teacher Dashboard, Application model, ApplicationService (apply, list, validation) |
+| Ahmet Iyidogan | Authentication, User model, Login/Register views, database setup, route guard, and main application routing |
+| Mert Kirtas | Admin Dashboard, SubstituteRequest model, RequestService (create, list, approve, reject), and request management logic |
 
 ---
 
