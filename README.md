@@ -52,124 +52,184 @@ When a teacher is absent:
 
 The platform ensures transparency, prevents double bookings, and maintains historical records.
 
+In rare exceptional cases, if a substitute teacher cancels or rejects the assignment shortly before the lesson begins and no replacement can be found in time, the school manager temporarily takes over the class until a new substitute teacher is assigned.
+
 ---
 
 ### User stories
 
-1. **(Login)**
-   As a user, I want to log into the system so that I can access my personal dashboard.
+### 1. Login
+**User Story:**  
+As a user, I want to log into the system so that I can access my personal dashboard.
 
-2. **(Create Substitute Request)**
-   As a school manager, I want to create a substitute request so that I can quickly find a replacement teacher.
+**Description:**  
+The user enters their email and password on the login page. The system verifies the credentials and redirects the user to the appropriate dashboard based on their role.
 
-3. **(View Open Requests)**
-   As a substitute teacher, I want to see all open substitute requests so that I can choose suitable assignments.
+**Inputs:**
+- email  
+- password  
 
-4. **(Accept Substitute Request)**
-   As a substitute teacher, I want to accept a request so that the school knows I will take the assignment.
-
-5. **(View Accepted Assignments)**
-   As a substitute teacher, I want to view my accepted assignments so that I can manage my schedule.
-
-6. **(View Request Status)**
-   As a school manager, I want to see who accepted a request so that planning is reliable.
-
-7. **(Cancel Substitute Request)**
-   As a school manager, I want to cancel a request so that outdated or unnecessary requests are removed.
-
-8. **(Manage Users and Roles)**
-   As an admin, I want to manage users and roles so that only authorized users can access the system.
-
-9. **(View Assignment History)**
-   As an admin, I want to view past assignments so that I can monitor system activity.
-
-10. **(Prevent Unauthorized Access / Conflicts)**
-    As the system, I want to prevent unauthorized access and double bookings so that security and scheduling are ensured.
-
-## Data Types
-**User**
-
-– id: int  
-– full_name: string   
-– email: string   
-– password: string   
-– role: enum (admin, school_manager, substitute_teacher)
-
-**Substitute Request**
-
-– id: int   
-– subject: string   
-– date: date   
-– status: string (open, accepted, cancelled, completed)   
-– created_by: int (user_id)
-
-**Assignment**
-
-– id: int   
-– request_id: int   
-– teacher_id: int   
-– status: string (assigned, completed)
+**Outputs:**
+- successful login confirmation  
+- redirect to personal dashboard  
+- error message if login fails  
 
 ---
 
-## Inputs
+### 2. Create Substitute Request
+**User Story:**  
+As a school manager, I want to create a substitute request so that I can quickly find a replacement teacher.
 
-**Login**   
-– email   
-– password  
+**Description:**  
+The school manager creates a new request by entering the required details. The system stores the request and makes it available to substitute teachers.
 
-**Register**   
-– full_name   
-– email   
-– password   
-– role   
+**Inputs:**
+- school name  
+- subject
+- date and time
+- notes (optional)  
 
-**Create Substitute Request**   
-– subject   
-– date   
-
-**Accept Request**   
-– request_id   
-
-**Cancel Request**   
-– request_id   
+**Outputs:**
+- confirmation that the request was created  
+- request appears in the list  
+- status set to "open"  
 
 ---
 
-## Expected Outputs
+### 3. View Open Requests
+**User Story:**  
+As a substitute teacher, I want to see all open substitute requests so that I can choose suitable assignments.
 
-**Login**   
-– Successful login → redirect to dashboard (admin / teacher / manager)   
-– Failed login → error message ("Invalid email or password")   
+**Description:**  
+The substitute teacher views a list of all currently open requests in the system.
 
-**Register**   
-– Success message → account created   
-– Error message → invalid or missing input   
+**Inputs:**
+- logged-in session  
 
-**Create Substitute Request**   
-– Request saved → visible to substitute teachers   
+**Outputs:**
+- list of open requests  
+- request details (school, subject, date / time, etc.)  
 
-**View Open Requests**   
-– List of all available requests   
+---
 
-**Accept Request**   
-– Request assigned to teacher   
-– Status updated to "accepted"   
+### 4. Accept Substitute Request
+**User Story:**  
+As a substitute teacher, I want to accept a request so that the school knows I will take the assignment.
 
-**View Assignments**   
-– List of accepted assignments   
+**Description:**  
+The substitute teacher selects an open request and accepts it. The system assigns the request and updates its status.
 
-**Cancel Request**   
-– Request removed or marked as cancelled   
+**Inputs:**
+- request_id  
+- logged-in session  
 
-**Admin Actions**   
-– Updated user list   
-– Updated system data  
+**Outputs:**
+- confirmation of acceptance  
+- request status updated to "accepted"
 
-**Security / Validation**   
-– Unauthorized access → redirect to login   
-– Double booking → error message   
+---
 
+### 5. View Accepted Assignments
+**User Story:**  
+As a substitute teacher, I want to view my accepted assignments so that I can manage my schedule.
+
+**Description:**  
+The teacher views all assignments that have been accepted.
+
+**Inputs:**
+- logged-in session  
+
+**Outputs:**
+- list of accepted assignments  
+- assignment details
+
+---
+
+### 6. View Request Status
+**User Story:**  
+As a school manager, I want to see who accepted a request so that planning is reliable.
+
+**Description:**  
+The manager views the status of each request and sees which teacher has accepted it.
+
+**Inputs:**
+- request_id  
+- logged-in session  
+
+**Outputs:**
+- request status  
+- assigned teacher information  
+
+---
+
+### 7. Cancel Substitute Request
+**User Story:**  
+As a school manager, I want to cancel a request so that outdated or unnecessary requests are removed.
+
+**Description:**  
+The manager cancels an existing request. The system updates the status and removes it from open requests.
+
+**Inputs:**
+- request_id  
+
+**Outputs:**
+- cancellation confirmation  
+- status updated to "cancelled"  
+
+---
+
+### 8. Manage Users and Roles
+**User Story:**  
+As an admin, I want to manage users and roles so that only authorized users can access the system.
+
+**Description:**  
+The admin creates, updates, or deletes users and assigns roles.
+
+**Inputs:**
+- user_id  
+- name  
+- email  
+- role  
+
+**Outputs:**
+- updated user list  
+- confirmation of changes  
+
+---
+
+### 9. View Assignment History
+**User Story:**  
+As an admin, I want to view past assignments so that I can monitor system activity.
+
+**Description:**  
+The admin reviews historical assignment data.
+
+**Inputs:**
+- logged-in admin session  
+- optional filters  
+
+**Outputs:**
+- list of past assignments  
+- status and activity overview
+
+---
+
+### 10. Prevent Unauthorized Access / Conflicts
+**User Story:**  
+As the system, I want to prevent unauthorized access and double bookings so that security and scheduling are ensured.
+
+**Description:**  
+The system checks permissions and validates scheduling conflicts.
+
+**Inputs:**
+- user role  
+- requested action  
+- request_id / time data  
+
+**Outputs:**
+- access denied or redirect  
+- error message for conflicts  
+- blocked invalid actions  in / teacher / manager)  
 ---
 
 ### Use cases
