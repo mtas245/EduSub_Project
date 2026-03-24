@@ -158,7 +158,7 @@ The manager views the status of each request and sees which teacher has accepted
 
 **Outputs:**
 - request status  
-- assigned teacher information  
+- assigned teacher information
 
 ---
 
@@ -180,10 +180,10 @@ The manager cancels an existing request. The system updates the status and remov
 
 ### 8. Manage Users and Roles
 **User Story:**  
-As an admin, I want to manage users and roles so that only authorized users can access the system.
+As an admin, I want to add users and roles so that only authorized users can access the system.
 
 **Description:**  
-The admin creates, updates, or deletes users and assigns roles.
+The admin creates and assigns roles.
 
 **Inputs:**
 - user_id  
@@ -214,22 +214,17 @@ The admin reviews historical assignment data.
 
 ---
 
-### 10. Prevent Unauthorized Access / Conflicts
+### 10. 
 **User Story:**  
-As the system, I want to prevent unauthorized access and double bookings so that security and scheduling are ensured.
+
 
 **Description:**  
-The system checks permissions and validates scheduling conflicts.
 
 **Inputs:**
-- user role  
-- requested action  
-- request_id / time data  
+
 
 **Outputs:**
-- access denied or redirect  
-- error message for conflicts  
-- blocked invalid actions  in / teacher / manager)  
+
 ---
 
 ### Use cases
