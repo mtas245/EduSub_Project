@@ -31,9 +31,7 @@ This project is intended to:
 ---
 
 ### Problem
-In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher.
-This process is often handled via phone calls, emails, or spreadsheets, which leads to delays, confusion, and lack of transparency.
-EduSub solves this coordination problem by providing a centralized web platform for managing substitute requests.
+In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher. This process is often handled through phone calls, emails, or spreadsheets, which can lead to delays and miscommunication. As a result, it becomes difficult to efficiently coordinate substitute assignments, track request statuses, and ensure that all classes are covered in time. EduMatch addresses this problem by providing a centralized web-based platform that streamlines the creation, management, and assignment of substitute requests, improving efficiency, transparency, and reliability in the process.
 
 ---
 
