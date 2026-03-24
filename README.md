@@ -40,10 +40,17 @@ EduSub solves this coordination problem by providing a centralized web platform 
 ### Scenario
 
 When a teacher is absent:
-1.	The school management creates a substitute request in the system.
-2.	Available substitute teachers can view open requests.
-3.	A substitute teacher can accept a request.
-4.	The system updates the status and records the assignment in the database.
+
+1. The school manager logs into the system.
+2. The school manager creates a substitute request including subject and date.
+3. The request is stored in the system and marked as "open".
+4. Substitute teachers log into the system and view all open requests.
+5. A substitute teacher selects and accepts a suitable request.
+6. The system assigns the request to the teacher and updates the status to "accepted".
+7. The school manager can view the updated request status.
+8. The system prevents multiple teachers from accepting the same request.
+9. All assignments are stored and can be reviewed later by the admin.
+10. Unauthorized users are prevented from accessing restricted features.
 
 The platform ensures transparency, prevents double bookings, and maintains historical records.
 
