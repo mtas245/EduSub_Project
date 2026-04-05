@@ -3,6 +3,7 @@ from datetime import date
 from models.request import SubstituteRequest, RequestStatus
 from models.application import Application, ApplicationStatus
 
+
 class RequestService:
 
     def __init__(self, db: Session):
@@ -11,7 +12,6 @@ class RequestService:
     def create_request(self, school_name: str, subject: str,
                        grade_level: str, date_obj: date,
                        notes: str, admin_id: int) -> SubstituteRequest:
-        
         req = SubstituteRequest(
             school_name=school_name,
             subject=subject,
@@ -24,17 +24,17 @@ class RequestService:
         self.db.commit()
         self.db.refresh(req)
         return req
-    
+
     def get_all_requests(self) -> list[SubstituteRequest]:
         return self.db.query(SubstituteRequest).order_by(
             SubstituteRequest.created_at.desc()
         ).all()
-    
+
     def get_open_requests(self) -> list[SubstituteRequest]:
         return self.db.query(SubstituteRequest).filter(
             SubstituteRequest.status == RequestStatus.OPEN
         ).order_by(SubstituteRequest.created_at.desc()).all()
-    
+
     def mark_filled(self, request_id: int) -> bool:
         req = self.db.query(SubstituteRequest).filter(
             SubstituteRequest.id == request_id
@@ -44,13 +44,12 @@ class RequestService:
         req.status = RequestStatus.FILLED
         self.db.commit()
         return True
-    
 
     def get_pending_applications(self) -> list[Application]:
         return self.db.query(Application).filter(
             Application.status == ApplicationStatus.PENDING
-        ).order_by(Application.created_at.desc()).all()
-    
+        ).all()
+
     def approve_application(self, app_id: int) -> bool:
         application = self.db.query(Application).filter(
             Application.id == app_id
@@ -61,7 +60,7 @@ class RequestService:
         self.mark_filled(application.request_id)
         self.db.commit()
         return True
-    
+
     def reject_application(self, app_id: int) -> bool:
         application = self.db.query(Application).filter(
             Application.id == app_id
@@ -71,4 +70,3 @@ class RequestService:
         application.status = ApplicationStatus.REJECTED
         self.db.commit()
         return True
-    

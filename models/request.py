@@ -22,8 +22,8 @@ class SubstituteRequest(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     creator = relationship('User', backref='requests')
-    applications = relationship('Application', back_populates='request',
-                                    cascade='all, delete-orphan')
+    #applications = relationship('Application', back_populates='request',
+                                  #  cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Request {self.subject} @ {self.school_name} on {self.date} >'

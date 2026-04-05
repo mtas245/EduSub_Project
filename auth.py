@@ -1,6 +1,6 @@
 import bcrypt
 from sqlalchemy.orm import Session
-from model.user import User, Role
+from models.user import User, Role
 
 def hash_password(plain: str) -> str:
     '''Hash a plain text password using bcyrpt'''

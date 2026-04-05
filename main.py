@@ -1,9 +1,12 @@
 from nicegui import ui, app
-
 from database import engine, Base
 from views.admin_dashboard import admin_dashboard
 from models.user import User
 from models.request import SubstituteRequest, RequestStatus
+from models.application import Application
+from views.login import login_page
+from views.register import register_page
+
 
 
 from views.login import login_page
@@ -59,3 +62,35 @@ if __name__ in {'__main__', '__mp_main__'}:
         port=8080,
         reload=False
     )
+
+def handle_register():
+    name  = name_input.value.strip()
+    email = email_input.value.strip()
+    pwd   = password_input.value
+    role  = role_select.value
+
+    # TEMP DEBUG — zeigt Fehler direkt auf der Seite
+    try:
+        if not name or not email or not pwd:
+            error_label.set_text('All fields are required.')
+            return
+        if len(pwd) < 6:
+            error_label.set_text('Password must be at least 6 characters.')
+            return
+
+        db: Session = SessionLocal()
+        try:
+            user = register_user(db, email, name, pwd, role)
+        finally:
+            db.close()
+
+        if not user:
+            error_label.set_text('This email is already registered.')
+            return
+
+        success_label.set_text(f'Welcome, {user.full_name}! Redirecting...')
+        error_label.set_text('')
+        ui.timer(1.5, lambda: ui.navigate.to('/'), once=True)
+
+    except Exception as e:
+        error_label.set_text(f'Error: {str(e)}')

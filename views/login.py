@@ -18,12 +18,12 @@ def login_page():
         return
 
     with ui.card().classes('absolute-center').style('width:380px; padding:2rem;'):
-        ui.label('Edumatch').classes('text-2xl font-bold text-blze-700')
+        ui.label('EduSub').classes('text-2xl font-bold text-blue-700')
         ui.label('Sign in to your account').classes('text-gray-500 mb-4')
 
         email_input = ui.input('Email address').classes('w-full')
         password_input = ui.input('Password', password=True).classes('w-full')
-        error_label = ui.input('').classes('text-red-500 text-sm')
+        error_label = ui.label('').classes('text-red-500 text-sm')
 
         def handle_login():
             email = email_input.value.strip()
@@ -34,15 +34,15 @@ def login_page():
                 return
             db: Session = SessionLocal()
             try:
-                login_user(db, email, password)
+                user = login_user(db, email, password)
             finally:
                 db.close()
 
             if not user:
-                error_label.set_text('invalid email or password')
+                error_label.set_text('Invalid email or password')
                 return
 
-            app.storage.user['logged in'] = True
+            app.storage.user['logged_in'] = True
             app.storage.user['user_id'] = user.id
             app.storage.user['full_name'] = user.full_name
             app.storage.user['role'] = user.role.value
