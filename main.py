@@ -1,8 +1,9 @@
 from nicegui import ui, app
 
 from database import engine, Base
-
+from views.admin_dashboard import admin_dashboard
 from models.user import User
+from models.request import SubstituteRequest, RequestStatus
 
 
 from views.login import login_page
@@ -40,7 +41,7 @@ def logout():
 def admin():
     if not require_login(['admin']):
         return
-    ui.label('Admin Dashboard – coming soon (Member B)')
+    admin_dashboard()
 
 @ui.page('/teacher')
 def teacher():
