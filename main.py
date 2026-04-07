@@ -57,8 +57,8 @@ if __name__ in {'__main__', '__mp_main__'}:
     Base.metadata.create_all(bind=engine)
 
     ui.run(
-        title='Edumatch',
-        storage_secret='edumatch-secret-key-change-in-prod',
+        title='EduSub',
+        storage_secret='EduSub-secret-key-change-in-prod',
         port=8080,
         reload=False
     )

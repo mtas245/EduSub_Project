@@ -1,10 +1,10 @@
-# 🎒 EduMatch – Teacher Substitute Management System
+# 🎒 EduSub – Teacher Substitute Management System
 
 > 🚧 Replace the screenshot with one that shows your main screen.
 
 ![UI Showcase](docs/ui-images/ui_showcase.png)
 
-EduMatch is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
+EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
 ---
 
 This project is intended to:
@@ -31,7 +31,7 @@ This project is intended to:
 ---
 
 ### Problem
-In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher. This process is often handled through phone calls, emails, or spreadsheets, which can lead to delays and miscommunication. As a result, it becomes difficult to efficiently coordinate substitute assignments, track request statuses, and ensure that all classes are covered in time. EduMatch addresses this problem by providing a centralized web-based platform that streamlines the creation, management, and assignment of substitute requests, improving efficiency, transparency, and reliability in the process.
+In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher. This process is often handled through phone calls, emails, or spreadsheets, which can lead to delays and miscommunication. As a result, it becomes difficult to efficiently coordinate substitute assignments, track request statuses, and ensure that all classes are covered in time. EduSub addresses this problem by providing a centralized web-based platform that streamlines the creation, management, and assignment of substitute requests, improving efficiency, transparency, and reliability in the process.
 
 ---
 
@@ -560,3 +560,4 @@ pytest
 This project is provided for **educational use only** as part of the Advanced Programming module.
 
 [MIT License](LICENSE)
+

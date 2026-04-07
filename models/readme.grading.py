@@ -21,7 +21,7 @@ from models.application import status
 
 ## Project Description
 
-EduMatch is a browser-based platform bıilt with python and NiceGUI that
+EduSub is a browser-based platform bıilt with python and NiceGUI that
 replaces informal WhatsApp-based substitute teacher coordination with a
 structured, role-aware web application. Schools post absences, teachers apply,
 and admins approve - all in one place.
@@ -99,4 +99,5 @@ Member A: database.py, auth.py, models/user.py, views/login.py, views/register.p
 Member B: Models/request.py, services/request_service.py, views/admin_dashboard.py
 
 Member C: models/applications.py, services/application_service.py, views/teacher_dashboard.py, README.md
+
 
