@@ -1,0 +1,5 @@
+
+edusub.db
+.nicegui/
+__pycache__/
+*.pyc
