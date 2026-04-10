@@ -1,6 +1,9 @@
 import bcrypt
 from sqlalchemy.orm import Session
 from models.user import User, Role
+import random
+from sqlalchemy.orm import Session
+from models.user import User
 
 def hash_password(plain: str) -> str:
     '''Hash a plain text password using bcyrpt'''
@@ -39,3 +42,14 @@ def login_user(db: Session, email: str, password: str) -> User | None:
     if not verify_password(password, user.password_hash):
         return None
     return user
+
+def generate_personal_number(db: Session) -> str:
+    year = 2026
+    while True:
+        number = random.randint(1000, 9999)
+        candidate = f'LP-{year}-{number}'
+        existing = db.query(User).filter(
+            User.personal_number == candidate
+        ).first()
+        if not existing:
+            return candidate
