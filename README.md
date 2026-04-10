@@ -31,32 +31,199 @@ This project is intended to:
 ---
 
 ### Problem
-In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher.
-This process is often handled via phone calls, emails, or spreadsheets, which leads to delays, confusion, and lack of transparency.
-EduSub solves this coordination problem by providing a centralized web platform for managing substitute requests.
+In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher. This process is often handled through phone calls, emails, or spreadsheets, which can lead to delays and miscommunication. As a result, it becomes difficult to efficiently coordinate substitute assignments, track request statuses, and ensure that all classes are covered in time. EduSub addresses this problem by providing a centralized web-based platform that streamlines the creation, management, and assignment of substitute requests, improving efficiency, transparency, and reliability in the process.
 
 ---
 
 ### Scenario
 
 When a teacher is absent:
-1.	The school management creates a substitute request in the system.
-2.	Available substitute teachers can view open requests.
-3.	A substitute teacher can accept a request.
-4.	The system updates the status and records the assignment in the database.
+
+1. The school manager logs into the system.
+2. The school manager creates a substitute request including subject and date.
+3. The request is stored in the system and marked as "open".
+4. Substitute teachers log into the system and view all open requests.
+5. A substitute teacher selects and accepts a suitable request.
+6. The system assigns the request to the teacher and updates the status to "accepted".
+7. The school manager can view the updated request status.
+8. The system prevents multiple teachers from accepting the same request.
+9. All assignments are stored and can be reviewed later by the admin.
+10. Unauthorized users are prevented from accessing restricted features.
 
 The platform ensures transparency, prevents double bookings, and maintains historical records.
+
+In rare exceptional cases, if a substitute teacher cancels or rejects the assignment shortly before the lesson begins and no replacement can be found in time, the school manager temporarily takes over the class until a new substitute teacher is assigned.
 
 ---
 
 ### User stories
 
-1.	As a school manager, I want to create a substitute request so that I can quickly find a replacement teacher.
-2.	As a substitute teacher, I want to see all open substitute requests so that I can choose suitable assignments.
-3.	As a substitute teacher, I want to accept a request so that the school knows I will take the assignment.
-4.	As a school manager, I want to see who accepted a request so that planning is reliable.
-5.	As an admin, I want to manage users and roles so that only authorized users access the system.
-6.	As the system, I want to prevent double bookings so that a substitute cannot accept overlapping assignments.
+### 1. Login
+**User Story:**  
+As a user, I want to log into the system so that I can access my personal dashboard.
+
+**Description:**  
+The user enters their email and password on the login page. The system verifies the credentials and redirects the user to the appropriate dashboard based on their role.
+
+**Inputs:**
+- email  
+- password  
+
+**Outputs:**
+- successful login confirmation  
+- redirect to personal dashboard  
+- error message if login fails  
+
+---
+
+### 2. Create Substitute Request
+**User Story:**  
+As a school manager, I want to create a substitute request so that I can quickly find a replacement teacher.
+
+**Description:**  
+The school manager creates a new request by entering the required details. The system stores the request and makes it available to substitute teachers.
+
+**Inputs:**
+- school name  
+- subject
+- date and time
+- notes (optional)  
+
+**Outputs:**
+- confirmation that the request was created  
+- request appears in the list  
+- status set to "open"  
+
+---
+
+### 3. View Open Requests
+**User Story:**  
+As a substitute teacher, I want to see all open substitute requests so that I can choose suitable assignments.
+
+**Description:**  
+The substitute teacher views a list of all currently open requests in the system.
+
+**Inputs:**
+- logged-in session  
+
+**Outputs:**
+- list of open requests  
+- request details (school, subject, date / time, etc.)  
+
+---
+
+### 4. Accept Substitute Request
+**User Story:**  
+As a substitute teacher, I want to accept a request so that the school knows I will take the assignment.
+
+**Description:**  
+The substitute teacher selects an open request and accepts it. The system assigns the request and updates its status.
+
+**Inputs:**
+- request_id  
+- logged-in session  
+
+**Outputs:**
+- confirmation of acceptance  
+- request status updated to "accepted"
+
+---
+
+### 5. View Accepted Assignments
+**User Story:**  
+As a substitute teacher, I want to view my accepted assignments so that I can manage my schedule.
+
+**Description:**  
+The teacher views all assignments that have been accepted.
+
+**Inputs:**
+- logged-in session  
+
+**Outputs:**
+- list of accepted assignments  
+- assignment details
+
+---
+
+### 6. View Request Status
+**User Story:**  
+As a school manager, I want to see who accepted a request so that planning is reliable.
+
+**Description:**  
+The manager views the status of each request and sees which teacher has accepted it.
+
+**Inputs:**
+- request_id  
+- logged-in session  
+
+**Outputs:**
+- request status  
+- assigned teacher information
+
+---
+
+### 7. Cancel Substitute Request
+**User Story:**  
+As a school manager, I want to cancel a request so that outdated or unnecessary requests are removed.
+
+**Description:**  
+The manager cancels an existing request. The system updates the status and removes it from open requests.
+
+**Inputs:**
+- request_id  
+
+**Outputs:**
+- cancellation confirmation  
+- status updated to "cancelled"  
+
+---
+
+### 8. Manage Users and Roles
+**User Story:**  
+As an admin, I want to add users and roles so that only authorized users can access the system.
+
+**Description:**  
+The admin creates and assigns roles.
+
+**Inputs:**
+- user_id  
+- name  
+- email  
+- role  
+
+**Outputs:**
+- updated user list  
+- confirmation of changes  
+
+---
+
+### 9. View Assignment History
+**User Story:**  
+As an admin, I want to view past assignments so that I can monitor system activity.
+
+**Description:**  
+The admin reviews historical assignment data.
+
+**Inputs:**
+- logged-in admin session  
+- optional filters  
+
+**Outputs:**
+- list of past assignments  
+- status and activity overview
+
+---
+
+### 10. 
+**User Story:**  
+
+
+**Description:**  
+
+**Inputs:**
+
+
+**Outputs:**
 
 ---
 
@@ -66,21 +233,61 @@ The platform ensures transparency, prevents double bookings, and maintains histo
 
 ![UML Use Case Diagram](docs/architecture-diagrams/uml_use_case_diagram.png)
 
-**Use cases**
-– Login (All users)
-– Create Substitute Request (School Manager)
-– View Open Requests (Substitute Teacher)
-– Accept Substitute Request (Substitute Teacher)
-– View Accepted Assignments (Substitute Teacher)
-– View Request Status (School Manager)
-– Cancel Substitute Request (School Manager)
-– Manage Users and Roles (Admin)
-– View Assignment History (Admin)
+<img width="480" height="813" alt="Bildschirmfoto 2026-03-23 um 13 17 25" src="https://github.com/user-attachments/assets/fcddd356-3ff6-4493-b692-5ee5b583e53c" />   
+
 
 **Actors**
-– School Manager (creates substitute requests, manages and confirms assignments)
-– Substitute Teacher (views open requests, accepts assignments, manages own schedule)
-– Admin (manages users, roles, schools, and monitors system activity)
+
+– **School Manager**  
+Creates substitute requests, manages and confirms assignments.
+
+– **Substitute Teacher**  
+Views open requests, accepts assignments, and manages own schedule.
+
+– **Admin**  
+Manages users, roles, schools, and monitors system activity.
+
+**Use cases**
+
+1. **Login (All Users)**  
+   Users log into the system using email and password.  
+   → System authenticates user and redirects to the correct dashboard.
+
+2. **Register Account (Visitor)**  
+   A new user creates an account by entering personal details and selecting a role.  
+   → Account is stored in the system.
+
+3. **Create Substitute Request (School Manager)**  
+   School Manager creates a request for a substitute teacher.  
+   → Request becomes visible to substitute teachers.
+
+4. **View Open Requests (Substitute Teacher)**  
+   Substitute Teacher views available substitute requests.  
+   → List of open requests is displayed.
+
+5. **Accept Substitute Request (Substitute Teacher)**  
+   Substitute Teacher accepts a request.  
+   → Request is assigned to the teacher.
+
+6. **View Accepted Assignments (Substitute Teacher)**  
+   Substitute Teacher views all accepted assignments.  
+   → Personal assignment list is shown.
+
+7. **View Request Status (School Manager)**  
+   School Manager checks the status of requests.  
+   → Status (open, accepted, completed) is displayed.
+
+8. **Cancel Substitute Request (School Manager)**  
+   School Manager cancels an existing request.  
+   → Request is removed or marked as cancelled.
+
+9. **Manage Users and Roles (Admin)**  
+   Admin creates, updates, or deletes users and roles.  
+   → System user data is updated.
+
+10. **View Assignment History (Admin)**  
+    Admin reviews past assignments and system activity.  
+    → Historical data is displayed.
 
 ---
 
@@ -327,9 +534,9 @@ pytest
 
 | Name      | Contribution |
 |-----------|--------------|
-| Student A | NiceGUI UI + documentation |
-| Student B | Database & ORM + documentation |
-| Student C | Business logic + documentation |
+| Ata Erduran | Teacher Dashboard, Application model, ApplicationService (apply, list, validation) |
+| Ahmet Iyidogan | Authentication, User model, Login/Register views, database setup, route guard, and main application routing |
+| Mert Kirtas | Admin Dashboard, SubstituteRequest model, RequestService (create, list, approve, reject), and request management logic |
 
 ---
 
@@ -353,3 +560,4 @@ pytest
 This project is provided for **educational use only** as part of the Advanced Programming module.
 
 [MIT License](LICENSE)
+
