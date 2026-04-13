@@ -8,6 +8,8 @@ from models.application import Application
 from views.login import login_page
 from views.register import register_page
 from views.admin_dashboard import admin_dashboard
+from views.teacher_dashboard import teacher_dashboard_view
+from views.profile import profile_view
 
 def require_login(allowed_roles: list[str]):
     """"
@@ -58,7 +60,13 @@ def admin():
 def teacher():
     if not require_login(['teacher']):
         return
-    ui.label('Teacher Dashboard - Coming Soon!')
+    teacher_dashboard_view()
+
+@ui.page('/profile')
+def profile():
+    if not require_login(['teacher', 'admin']):
+        return
+    profile_view()
 
 if __name__ in {'__main__', '__mp_main__'}:
     Base.metadata.create_all(bind=engine)
