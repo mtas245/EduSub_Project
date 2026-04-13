@@ -13,14 +13,9 @@ SUBJECTS_BY_GRADE = {
     'Grade56': ['German', 'Mathematics', 'LNMG', 'Textiles & Crafts', 'Art (BG)', 'PE', 'Music', 'French', 'English'], 
 }
 
-GRADE_LEVELS = [
-    'KG1', 'KG2',
-    '1a', '1b', '1c', '2a', '2b', '2c',
-    '3a', '3b', '3c', '4a', '4b', '4c',
-    '5a', '5b', '5c', '6a', '6b', '6c',
-]
+GRADE_LEVELS = GRADE_LEVELS
 
-def get_subjects_for_grade(grade_level: str) -> list:
+def get_subjects_for_grade(grade: str) -> list:
     if grade in ('KG1', 'KG2'):                 return SUBJECTS_BY_GRADE['KG']
     if grade in ('1a', '1b', '1c', '2a', '2b', '2c'): return SUBJECTS_BY_GRADE['Grade12']
     if grade in ('3a', '3b', '3c', '4a', '4b', '4c'): return SUBJECTS_BY_GRADE['Grade34']
@@ -146,7 +141,7 @@ def admin_dashboard():
                 {
                     'grade': r.grade_level,
                     'subject': r.subject,
-                    'date': str(r.date),
+                    'date': r.date.strftime('%Y-%m-%d') if r.date else '-',
                     'status': r.status.value
                 }
                 for r in all_requests
@@ -166,7 +161,7 @@ def admin_dashboard():
                     with ui.row().classes('items-center gap-4 border-b py-2'):
                         ui.label(f'Teacher ID: {appl.teacher_id}').classes('flex-1')
                         ui.label(f'Request ID: {appl.request_id}').classes('flex-1')
-                        ui.label(f'Applied at: {appl.applied_at}').classes(
+                        ui.label(f'Applied at: {appl.applied_at.strftime("%Y-%m-%d %H:%M:%S") if appl.applied_at else "-"}').classes(
                             'flex-1 text-sm text-gray-500')
                         app_id = appl.id
                         ui.button(
