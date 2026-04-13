@@ -10,14 +10,15 @@ class RequestService:
         self.db = db
 
     def create_request(self, subject: str, grade_level: str,
-                       date_obj: date, note: str,
-                       admin_id: int) -> SubstituteRequest:
+                       date_obj: date, note: str, admin_id: int,
+                       time_slot: str = None) -> SubstituteRequest:
         req = SubstituteRequest(
             subject=subject,
             grade_level=grade_level,
             date=date_obj,
             note=note,
-            created_by=admin_id
+            created_by=admin_id,
+            time_slot=time_slot
         )
         self.db.add(req)
         self.db.commit()

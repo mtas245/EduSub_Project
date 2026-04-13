@@ -114,6 +114,7 @@ def admin_dashboard():
                     subject=subject,
                     grade_level=grade,
                     date_obj=date_obj,
+                    time_slot=time_input.value or None,
                     note=note_input.value,
                     admin_id=admin_id,
                 )
@@ -135,6 +136,7 @@ def admin_dashboard():
                 {'name': 'grade', 'label': 'Class', 'field': 'grade'},
                 {'name': 'subject', 'label': 'Subject', 'field': 'subject'},
                 {'name': 'date', 'label': 'Date', 'field': 'date'},
+                {'name': 'time_slot', 'label': 'Time Slot', 'field': 'time_slot'},
                 {'name': 'status', 'label': 'Status', 'field': 'status'},
             ]
             rows = [
@@ -142,6 +144,7 @@ def admin_dashboard():
                     'grade': r.grade_level,
                     'subject': r.subject,
                     'date': r.date.strftime('%Y-%m-%d') if r.date else '-',
+                    'time_slot': r.time_slot if r.time_slot else '-',
                     'status': r.status.value
                 }
                 for r in all_requests

@@ -42,7 +42,7 @@ def teacher_dashboard_view():
             level = grade_filter.value
             filtered = valid
 
-            if level == 'Kindergarten':
+            if level == 'KG':
                 filtered = [r for r in valid if r.grade_level in ('KG1', 'KG2')]
 
             elif level == 'Primary':
@@ -63,10 +63,9 @@ def teacher_dashboard_view():
                                 ui.label(
                                     f'Date: {req.date.strftime("%Y-%m-%d")}'
                                 ).classes('text-gray-600')
-                                if req.time_slot:
-                                    ui.label(
-                                        f'Time: {req.time_slot}'
-                                    ).classes('text-gray-500')
+                                ui.label(
+                                    f'Time: {req.time_slot}' if req.time_slot else 'Time: not specified'
+                                ).classes('text-gray-500')
                                 if req.expires_at:
                                     hours = int(
                                         (req.expires_at - datetime.now()).total_seconds() // 3600
@@ -76,11 +75,11 @@ def teacher_dashboard_view():
 
                             def make_apply(rid=req.id):
                                 def apply():
-                                    app_service.create_application(
+                                    result = app_service.apply(
                                         teacher_id=teacher_id, 
                                         request_id=rid
                                     )
-                                    ui.notify('Application submitted!')
+                                    ui.notify(result['message'])
                                     render()
                                 return apply
                             
