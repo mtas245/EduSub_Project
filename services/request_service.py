@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta, time as dt_time
-from models.request import SubstituteRequest, RequestStatus
+from models.request import SubstituteRequest, RequestStatus, GRADE_LEVELS
 from models.application import Application, ApplicationStatus
 
 class RequestService:
