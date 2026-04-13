@@ -20,6 +20,7 @@ def register_user(db: Session, email: str, full_name: str,
     existing = db.query(User).filter(User.email == email).first()
     if existing:
         return None # if email taken
+    
     new_user = User(
         email=email,
         full_name=full_name,
@@ -27,6 +28,10 @@ def register_user(db: Session, email: str, full_name: str,
         role=Role(role)
     )
     db.add(new_user)
+    db.flush() # get the id without committing
+
+    new_user.personal_number = generate_personal_number(db)
+
     db.commit()
     db.refresh(new_user)
     return new_user
@@ -53,3 +58,5 @@ def generate_personal_number(db: Session) -> str:
         ).first()
         if not existing:
             return candidate
+        
+        
