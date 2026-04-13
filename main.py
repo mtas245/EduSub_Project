@@ -1,11 +1,14 @@
 from nicegui import ui, app
-from database import engine, Base
+from database import engine, Base, SessionLocal
+from edumatch.models.subject import DEFAULT_SUBJECTS
 from views.admin_dashboard import admin_dashboard
 from models.user import User
 from models.request import SubstituteRequest, RequestStatus
 from models.application import Application
 from views.login import login_page
 from views.register import register_page
+from models import user, request, application, subject
+from models.subject import Subject, DEFAULT_SUBJECTS
 
 
 
@@ -25,6 +28,20 @@ def require_login(allowed_roles: list[str]):
         ui.navigate.to('/')
         return False
     return True
+
+Base.metadata.create_all(bind=engine)
+
+def seed_subjects():
+    db = SessionLocal()
+    if db.query(Subject).count() == 0:
+        for s in DEFAULT_SUBJECTS:
+            db.add(DEFAULT_SUBJECTS(
+                name=s['name'],
+                level=s['level'],
+                grades=','.join(s['grades'])
+            ))
+        db.commit()
+    db.close()
 
 @ui.page('/')
 def index():

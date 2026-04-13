@@ -1,7 +1,7 @@
 from nicegui import ui
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from auth import register_user
+from auth import register_user, generate_personal_number
 
 
 def register_page():
@@ -15,6 +15,7 @@ def register_page():
 
         name_input     = ui.input('Full Name').classes('w-full mb-2')
         email_input    = ui.input('Email address').classes('w-full mb-2')
+        phone_inpput   = ui.input('Phone(optional)').classes('w-full mb-2')
         password_input = ui.input('Password', password=True).classes('w-full mb-2')
         role_select    = ui.select(
             options=['teacher', 'admin'],
