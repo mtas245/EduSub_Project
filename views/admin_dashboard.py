@@ -1,4 +1,5 @@
 from nicegui import ui, app 
+from models.request import GRADE_LEVELS
 from database import SessionLocal
 from services.request_service import RequestService
 from datetime import date, datetime, timedelta
