@@ -68,6 +68,13 @@ def profile():
         return
     profile_view()
 
+@ui.page('/admin/teacher/{teacher_id}')
+def admin_teacher_profile(teacher_id: int):
+    if not require_login(['admin']):
+        return
+    from views.admin_teacher_profile import admin_teacher_profile_view
+    admin_teacher_profile_view(teacher_id)
+
 if __name__ in {'__main__', '__mp_main__'}:
     Base.metadata.create_all(bind=engine)
     seed_subjects()

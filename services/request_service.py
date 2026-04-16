@@ -108,3 +108,16 @@ class RequestService:
         self.db.commit()
         return True
     
+    def get_approved_assignments_for_teacher(self, teacher_id: int) -> list:
+        """Returns all requests where the teacher's application was approved."""
+        return (
+            self.db.query(SubstituteRequest)
+            .join(Application, SubstituteRequest.id == Application.request_id)
+            .filter(
+                Application.teacher_id == teacher_id,
+                Application.status == ApplicationStatus.APPROVED
+            )
+            .order_by(SubstituteRequest.date.desc())
+            .all()
+        )
+    

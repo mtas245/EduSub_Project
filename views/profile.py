@@ -52,6 +52,7 @@ def profile_view():
                 subjects=subjects_input.value,
                 bio=bio_input.value,
             )
+            ui.notify('Changes saved ✓', type='positive', position='top')
 
 
     ui.button("Save", on_click=save).classes("w-full mt-4")
