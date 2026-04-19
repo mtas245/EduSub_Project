@@ -1,13 +1,14 @@
-from sqlalchemy import Column, Integer, String
-from database import Base
+from typing import Optional
+from sqlmodel import Field, SQLModel
 
-class Subject(Base):
+
+class Subject(SQLModel, table=True):
     __tablename__ = 'subjects'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    level = Column(String, nullable=False)
-    grades = Column(String, nullable=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(nullable=False)
+    level: str = Field(nullable=False)
+    grades: Optional[str] = Field(default=None)
 
 DEFAULT_SUBJECTS = [
     # Kindergarten (KG1, KG2)

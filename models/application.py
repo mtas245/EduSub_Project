@@ -1,22 +1,20 @@
-# models/application.py
-# Temporary empty file — Member C will fill this
-from sqlalchemy import Column, Integer, DateTime, ForeignKey, Enum as SAEnum
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from typing import Optional
+from sqlmodel import Field, SQLModel
+from datetime import datetime
 import enum
-from database import Base
 
 
-class ApplicationStatus(enum.Enum):
+class ApplicationStatus(str, enum.Enum):
     PENDING  = 'pending'
     APPROVED = 'approved'
     REJECTED = 'rejected'
 
 
-class Application(Base):
+class Application(SQLModel, table=True):
     __tablename__ = 'applications'
-    id         = Column(Integer, primary_key=True, index=True)
-    teacher_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    request_id = Column(Integer, ForeignKey('substitute_requests.id'), nullable=False)
-    status     = Column(SAEnum(ApplicationStatus), default=ApplicationStatus.PENDING)
-    applied_at = Column(DateTime, server_default=func.now())
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    teacher_id: int = Field(foreign_key='users.id', nullable=False)
+    request_id: int = Field(foreign_key='substitute_requests.id', nullable=False)
+    status: ApplicationStatus = Field(default=ApplicationStatus.PENDING)
+    applied_at: datetime = Field(default_factory=datetime.now)

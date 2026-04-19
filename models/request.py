@@ -1,10 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SAEnum
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from typing import Optional
+from sqlmodel import Field, SQLModel
+from datetime import datetime
 import enum
-from database import Base
 
-class RequestStatus(enum.Enum):
+
+class RequestStatus(str, enum.Enum):
     OPEN = 'open'
     FILLED = 'filled'
     CANCELLED = 'cancelled'
@@ -16,21 +16,19 @@ GRADE_LEVELS = [
     '5a', '5b', '6a', '6b'
 ]
 
-class SubstituteRequest(Base):
+class SubstituteRequest(SQLModel, table=True):
     __tablename__ = 'substitute_requests'
 
-    id = Column(Integer, primary_key=True, index=True)
-    created_by = Column(Integer, ForeignKey('users.id'), nullable=False)
-    subject = Column(String, nullable=False)
-    grade_level = Column(String, nullable=False)
-    date = Column(DateTime, nullable=False)
-    time_slot = Column(String, nullable=True)  # e.g. "08:00-12:00"
-    note = Column(String, nullable=True)
-    status = Column(SAEnum(RequestStatus), default=RequestStatus.OPEN, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    expires_at = Column(DateTime, nullable=True)
-
-    creator = relationship('User', backref='requests')
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_by: int = Field(foreign_key='users.id', nullable=False)
+    subject: str = Field(nullable=False)
+    grade_level: str = Field(nullable=False)
+    date: datetime = Field(nullable=False)
+    time_slot: Optional[str] = Field(default=None)  # e.g. "08:00-12:00"
+    note: Optional[str] = Field(default=None)
+    status: RequestStatus = Field(default=RequestStatus.OPEN)
+    created_at: datetime = Field(default_factory=datetime.now)
+    expires_at: Optional[datetime] = Field(default=None)
 
     def __repr__(self):
         return f'<Request {self.subject} {self.grade_level} on {self.date}>'

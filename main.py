@@ -1,10 +1,9 @@
 from nicegui import ui, app
-from database import engine, Base, SessionLocal
-from models import user, request, application, subject
-from models.subject import Subject, DEFAULT_SUBJECTS
-from models.user import User
-from models.request import SubstituteRequest, RequestStatus
-from models.application import Application
+from database import engine, SessionLocal, create_db
+from models import User, SubstituteRequest, Application, Subject
+from models.subject import DEFAULT_SUBJECTS
+from models.request import RequestStatus
+from models.application import ApplicationStatus
 from views.login import login_page
 from views.register import register_page
 from views.admin_dashboard import admin_dashboard
@@ -24,18 +23,17 @@ def require_login(allowed_roles: list[str]):
     return True
 
 def seed_subjects():
-    db = SessionLocal()
-    try:
-        if db.query(Subject).count() == 0:
+    from sqlmodel import Session, select
+    with Session(engine) as session:
+        if session.exec(select(Subject)).first() is None:
             for s in DEFAULT_SUBJECTS:
-                db.add(Subject(
+                session.add(Subject(
                     name=s['name'],
                     level=s['level'],
                     grades=','.join(s['grades'])
                 ))
-            db.commit()
-    finally:
-        db.close()
+            session.commit()
+
 
 @ui.page('/')
 def index():
@@ -76,11 +74,11 @@ def admin_teacher_profile(teacher_id: int):
     admin_teacher_profile_view(teacher_id)
 
 if __name__ in {'__main__', '__mp_main__'}:
-    Base.metadata.create_all(bind=engine)
+    create_db()
     seed_subjects()
     ui.run(
         title='EduSub',
-        storage_secret='EduSub-secret-key-changes-in-prod',
+        storage_secret='EduSub-secret-key-change-in-prod',
         port=8080,
         reload=False
     )
