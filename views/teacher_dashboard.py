@@ -1,4 +1,4 @@
-from nicegui import classes, ui, app
+from nicegui import ui, app
 from database import SessionLocal
 from services.request_service import RequestService
 from services.application_service import ApplicationService
@@ -29,7 +29,7 @@ def teacher_dashboard_view():
 
         with ui.tab_panels(tabs, value=tab_open).classes('w-full'):
 
-            # --- Tab 1: Available Assignments / Open Assignments---
+            #--- Tab 1: Available Assignments ---
             with ui.tab_panel(tab_open):
                 grade_filter = ui.select(
                     label='Educational level',
@@ -50,13 +50,16 @@ def teacher_dashboard_view():
                     if level == 'KG':
                         filtered = [r for r in valid if r.grade_level in ['KG1', 'KG2']]
                     elif level == 'Primary':
-                        filtered = [r for r in valid if r.grade_level not in ['KG1', 'KG2']]
+                        filtered = [r for r in valid if r.grade_level not in ['KG1','KG2']]
 
                     with open_container:
                         if not filtered:
                             ui.label('No open assignments.').classes('text-gray-400')
                             return
+                        
                         for req in filtered:
+                            already_applied = app_service.has_applied(teacher_id, req.id)
+
                             with ui.card().classes('w-full p-4 mb-3'):
                                 with ui.row().classes('w-full justify-between items-center'):
                                     with ui.column():
@@ -82,19 +85,25 @@ def teacher_dashboard_view():
                                                 teacher_id=teacher_id,
                                                 request_id=rid
                                             )
-                                            ui.notify(result['message'])
+                                            ui.notify(result['message'],
+                                                      color='positive' if result['success'] else 'negative')
                                             render_open()
                                         return apply
                                     
-                                    ui.button('Apply', on_click=make_apply())
+                                    # Button deaktiviert wenn bereits beworben
+                                    btn = ui.button(
+                                        'Already Applied' if already_applied else 'Apply',
+                                        on_click=make_apply()
+                                    )
+                                    if already_applied:
+                                        btn.props('disabled').classes('bg-gray-300 text-gray-500')
 
                     grade_filter.on('update:model-value', lambda: render_open())
-                render_open()
+                    render_open()
 
-            # --- Tab 2: My approved assignments ---
-
+            # Tab 2: My confirmed assignemnts
             with ui.tab_panel(tab_mine):
-                ui.label('Your confirmed substitute assignements').classes(
+                ui.label('Your confirmed substitute assignments').classes(
                     'text-sm text-gray-500 mb-4'
                 )
                 my_assignments = req_service.get_approved_assignments_for_teacher(teacher_id)
@@ -103,7 +112,7 @@ def teacher_dashboard_view():
                     ui.label('No confirmed assignments yet.').classes('text-gray-400 mt-4')
                 else:
                     for req in my_assignments:
-                        with ui.card().classes('w-full p-4 mb-3 border-1-4 border-green-500'):
+                        with ui.card().classes('w-full p-4 mb-3 border-1-4 boder-green-500'):
                             with ui.row().classes('w-full justify-between items-center'):
                                 with ui.column():
                                     ui.label(
@@ -118,8 +127,9 @@ def teacher_dashboard_view():
                                     if req.note:
                                         ui.label(f'Note: {req.note}').classes('text-gray-400 text-sm')
                                     ui.badge('Confirmed', color='green').classes('text-white')
-    db.close()
 
+        db.close()
+                                        
                     
                                                                                       
                                                                                     
