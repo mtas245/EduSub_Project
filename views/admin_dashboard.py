@@ -3,8 +3,8 @@ from models.request import GRADE_LEVELS
 from database import SessionLocal
 from services.request_service import RequestService
 from datetime import date, datetime, timedelta
+import re
 
-# --- Subject catalogue per grade group ---
 SUBJECTS_BY_GRADE = {
     'KG': ['Free Play', 'Movement', 'Crafts'],
     'Grade12': ['German', 'Mathematics', 'LNMG', 'Textiles & Crafts', 'Art (BG)', 'PE', 'Music'],
@@ -47,214 +47,207 @@ def admin_dashboard():
             ui.icon('school').classes('text-2xl text-blue-200')
             ui.label('EduSub').classes('text-xl font-bold tracking-wide text-white')
             ui.label('| Admin').classes('text-blue-300 text-sm')
-            ui.label(f'- {full_name}').classes('text-blue-300 text-sm')
+            ui.label(f'– {full_name}').classes('text-blue-300 text-sm')
         ui.button('Logout', icon='logout',
                   on_click=lambda: ui.navigate.to('/logout')).classes(
-                      'bg-transparent text-white border border-blue-500 rounded-lg px-4 py-2 text-sm hover:bg-blue-700')
-    
+            'bg-transparent text-white border border-blue-500 rounded-lg px-4 py-2 text-sm hover:bg-blue-700')
+
     with ui.column().classes('w-full max-w-5xl mx-auto p-6 gap-6'):
 
         all_requests = svc.get_all_requests()
         open_requests = svc.get_open_requests()
         pending_apps = svc.get_pending_applications()
 
-        # --- Stats Cards ---
+        # --- Stats ---
         with ui.row().classes('w-full gap-4'):
             with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                with ui.row().classes('items-center justify-center gap-2 mb-1'):
-                    ui.icon('list_alt').classes('text-blue-400 text-2xl')
+                ui.icon('list_alt').classes('text-blue-400 text-2xl')
                 ui.label(str(len(all_requests))).classes('text-4xl font-bold text-blue-700')
                 ui.label('Total Requests').classes('text-gray-400 text-sm mt-1')
-
             with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                with ui.row().classes('items-center justify-center gap-2 mb-1'):
-                    ui.icon('event_available').classes('text-green-400 text-2xl')
+                ui.icon('event_available').classes('text-green-400 text-2xl')
                 ui.label(str(len(open_requests))).classes('text-4xl font-bold text-green-600')
                 ui.label('Open Requests').classes('text-gray-400 text-sm mt-1')
-
             with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                with ui.row().classes('items-center justify-center gap-2 mb-1'):
-                    ui.icon('pending_actions').classes('text-yellow-400 text-2xl')
+                ui.icon('pending_actions').classes('text-yellow-400 text-2xl')
                 ui.label(str(len(pending_apps))).classes('text-4xl font-bold text-yellow-600')
                 ui.label('Pending Applications').classes('text-gray-400 text-sm mt-1')
 
-                # --- Create Request ---
-            with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
-                with ui.row().classes('items-center gap-2 mb-4'):
-                    ui.icon('add_circle').classes('text-blue-500 text-xl')
-                    ui.label('Create New Substitute Request').classes('text-lg font-semibold')
+        # --- Create Request ---
+        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+            with ui.row().classes('items-center gap-2 mb-4'):
+                ui.icon('add_circle').classes('text-blue-500 text-xl')
+                ui.label('Create New Substitute Request').classes('text-lg font-semibold')
 
-                with ui.row().classes('gap-3 flex-wrap'):
-                    grade_select = ui.select(
-                        options=GRADE_LEVELS,
-                        label='Class / Grade',
-                        value='1a'
-                    ).classes('flex1')
+            with ui.row().classes('gap-3 flex-wrap'):
+                grade_select = ui.select(
+                    options=GRADE_LEVELS,
+                    label='Class / Grade',
+                    value='1a'
+                ).classes('flex-1')
 
-                    initial_subjects = get_subjects_for_grade('1a')
-                    subject_select = ui.select(
-                        options=initial_subjects,
-                        label='Subject',
-                        value=initial_subjects[0]
-                    ).classes('flex-1')
+                initial_subjects = get_subjects_for_grade('1a')
+                subject_select = ui.select(
+                    options=initial_subjects,
+                    label='Subject',
+                    value=initial_subjects[0]
+                ).classes('flex-1')
 
-                    date_input = ui.date(value=str(date.today())).classes('flex-1')
-                    time_input = ui.input(label='Time Slot (e.g. 08:00-12:00)').classes('flex-1')
-                    note_input = ui.textarea(label='Additional Notes').classes('flex-1')
+                date_input = ui.date(value=str(date.today())).classes('flex-1')
+                time_input = ui.input(label='Time Slot (e.g. 08:00-12:00)').classes('flex-1')
+                note_input = ui.textarea(label='Additional Notes').classes('flex-1')
 
-                result_label = ui.label('').classes('text-sm mt-1 text-gray-500')
+            def on_grade_change(e):
+                new_subjects = get_subjects_for_grade(e.value)
+                subject_select.options = new_subjects
+                subject_select.value = new_subjects[0]
+                subject_select.update()
 
-                def on_grade_change(e):
-                    new_subjects = get_subjects_for_grade(e.value)
-                    subject_select.options = new_subjects
-                    subject_select.value = new_subjects[0]
-                    subject_select.update()
+            grade_select.on('update:model-value', on_grade_change)
 
-                grade_select.on('update:model-value', on_grade_change)
+            def create_request():
+                grade = grade_select.value
+                subject = subject_select.value
+                dt = date_input.value
 
-                def create_request():
-                    grade = grade_select.value
-                    subject = subject_select.value
-                    dt = date_input.value
-                    if not subject or not dt:
-                        result_label.set_text('Please fill in all required fields.')
+                if not subject or not dt:
+                    ui.notify('Please fill in all required fields.', color='negative')
+                    return
+
+                date_obj = datetime.strptime(dt, '%Y-%m-%d').date()
+
+                if date_obj < date.today():
+                    ui.notify('The date cannot be in the past.', color='negative')
+                    return
+
+                time_slot = time_input.value or None
+                if time_slot:
+                    if not re.match(r'^\d{2}:\d{2}-\d{2}:\d{2}$', time_slot):
+                        ui.notify('Time slot must be in format HH:MM-HH:MM (e.g. 08:00-12:00).', color='negative')
                         return
-                    date_obj = datetime.strptime(dt, '%Y-%m-%d').date()
-                    calculate_expires_at(date_obj, time_input.value or None)
-                    req = svc.create_request(
-                        subject=subject,
-                        grade_level=grade,
-                        date_obj=date_obj,
-                        time_slot=time_input.value or None,
-                        note=note_input.value,
-                        admin_id=admin_id,
-                    )
-                    ui.notify(
-                        f'Request created: {req.subject} - {req.grade_level} on {req.date}',
-                        color='positive'
-                    )
-                    ui.navigate.to('/admin')
 
-                ui.button('Create Request', icon='send',
-                          on_click=create_request).classes(
-                              'bg-blue-700 text-white rounded-lg px-5 py-2 mt-3 hover:bg-blue-800')
-                
-                # --- All Requests Table ---
-            with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
-                with ui.row().classes('items-center gap-2 mb-4'):
-                    ui.icon('table_view').classes('text-blue-500 text-xl')
-                    ui.label('All Substitute Requests').classes('text-lg font-semibold')
-                ui.label('Click on a row to see details.').classes('text-xs text-gray-400 mb-2')
+                calculate_expires_at(date_obj, time_slot)
+                req = svc.create_request(
+                    subject=subject,
+                    grade_level=grade,
+                    date_obj=date_obj,
+                    time_slot=time_slot,
+                    note=note_input.value,
+                    admin_id=admin_id,
+                )
+                ui.notify(
+                    f'Request created: {req.subject} – {req.grade_level} on {req.date}',
+                    color='positive'
+                )
+                ui.navigate.to('/admin')
 
-                columns = [
-                    {'name': 'grade',     'label': 'Class',     'field': 'grade',     'align': 'left'},
-                    {'name': 'subject',   'label': 'Subject',   'field': 'subject',   'align': 'left'},
-                    {'name': 'date',      'label': 'Date',      'field': 'date',      'align': 'left'},
-                    {'name': 'time_slot', 'label': 'Time Slot', 'field': 'time_slot', 'align': 'left'},
-                    {'name': 'status',    'label': 'Status',    'field': 'status',    'align': 'left'},
-                ]
-                rows = [
-                    {
-                        'id': r.id,
-                        'grade': r.grade_level,
-                        'subject': r.subject,
-                        'date': r.date.strftime('%d.%m.%Y') if r.date else '-',
-                        'time_slot': r.time_slot if r.time_slot else '-',
-                        'status': r.status.value,
-                        'note': r.note or '-',
-                        'created_at': r.created_at.strftime('%d.%m.%Y %H:%M') if r.created_at else '-',
-                        'expires_at': r.expires_at.strftime('%d.%m.%Y %H:%M') if r.expires_at else '-',
-                    }
-                    for r in all_requests
-                ]
-                
-                #---Detail Dialog---
-                with ui.dialog() as detail_dialog, ui.card().classes('p-6 min-w-96 rounded-xl'):
-                    ui.label('Request Details').classes('text-lg font-semibold mb-4')
-                    detail_grade = ui.label('')
-                    detail_subject = ui.label('')
-                    detail_date = ui.label('')
-                    detail_time = ui.label('')
-                    detail_status = ui.label('')
-                    detail_note = ui.label('')
-                    detail_created = ui.label('')
-                    detail_expires = ui.label('')
-                    ui.button('Close', on_click=detail_dialog.close).classes(
-                        'mt-4 bg-blue-700 text-white rounded-lg px-4')
-                    
-                def on_row_click(e):
-                    row = e.args[1]
-                    detail_grade.set_text(f'Class: {row["grade"]}')
-                    detail_subject.set_text(f'Subject:    {row["subject"]}')
-                    detail_date.set_text(f'Date:       {row["date"]}')
-                    detail_time.set_text(f'Time Slot:  {row["time_slot"]}')
-                    detail_status.set_text(f'Status:     {row["status"]}')
-                    detail_note.set_text(f'Note:       {row["note"]}')
-                    detail_created.set_text(f'Created:    {row["created_at"]}')
-                    detail_expires.set_text(f'Expires:    {row["expires_at"]}')
-                    detail_dialog.open()
+            ui.button('Create Request', icon='send',
+                      on_click=create_request).classes(
+                'bg-blue-700 text-white rounded-lg px-5 py-2 mt-3 hover:bg-blue-800')
 
-                table = ui.table(columns=columns, rows=rows).classes('w-full cursor-pointer')
-                table.on('rowClick', on_row_click)
-                
-                
-                
-                    
-                                
+        # --- All Requests Table ---
+        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+            with ui.row().classes('items-center gap-2 mb-4'):
+                ui.icon('table_view').classes('text-blue-500 text-xl')
+                ui.label('All Substitute Requests').classes('text-lg font-semibold')
+            ui.label('Click on a row to see details.').classes('text-xs text-gray-400 mb-2')
 
-                #---Pending Applications---
+            columns = [
+                {'name': 'grade',     'label': 'Class',     'field': 'grade',     'align': 'left'},
+                {'name': 'subject',   'label': 'Subject',   'field': 'subject',   'align': 'left'},
+                {'name': 'date',      'label': 'Date',      'field': 'date',      'align': 'left'},
+                {'name': 'time_slot', 'label': 'Time Slot', 'field': 'time_slot', 'align': 'left'},
+                {'name': 'status',    'label': 'Status',    'field': 'status',    'align': 'left'},
+            ]
+            rows = [
+                {
+                    'id':         r.id,
+                    'grade':      r.grade_level,
+                    'subject':    r.subject,
+                    'date':       r.date.strftime('%d.%m.%Y') if r.date else '-',
+                    'time_slot':  r.time_slot if r.time_slot else '-',
+                    'status':     r.status.value,
+                    'note':       r.note or '-',
+                    'created_at': r.created_at.strftime('%d.%m.%Y %H:%M') if r.created_at else '-',
+                    'expires_at': r.expires_at.strftime('%d.%m.%Y %H:%M') if r.expires_at else '-',
+                }
+                for r in all_requests
+            ]
 
-            with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
-                with ui.row().classes('items-center gap-2 mb-4'):
-                    ui.icon('pending_actions').classes('text-yellow-500 text-xl')
-                    ui.label('Pending Applications').classes('text-lg font-semibold')
+            with ui.dialog() as detail_dialog, ui.card().classes('p-6 min-w-96 rounded-xl'):
+                ui.label('Request Details').classes('text-lg font-semibold mb-4')
+                detail_grade   = ui.label('')
+                detail_subject = ui.label('')
+                detail_date    = ui.label('')
+                detail_time    = ui.label('')
+                detail_status  = ui.label('')
+                detail_note    = ui.label('')
+                detail_created = ui.label('')
+                detail_expires = ui.label('')
+                ui.button('Close', on_click=detail_dialog.close).classes(
+                    'mt-4 bg-blue-700 text-white rounded-lg px-4')
 
-                if not pending_apps:
-                    with ui.column().classes('w-full items-center py-8 text-gray-400'):
-                        ui.icon('check_circle').classes('text-4xl mb-2 text-green-400')
-                        ui.label('No pending applications at the moment.').classes('text-sm')
-                else:
-                    for appl in pending_apps:
-                        from models.user import User
-                        teacher = db.query(User).filter(User.id == appl.teacher_id).first()
-                        teacher_name = teacher.full_name if teacher else f'Teacher #{appl.teacher_id}'
-                        teacher_pnr = teacher.personal_number if teacher else '-'
+            def on_row_click(e):
+                row = e.args[1]
+                detail_grade.set_text(f'Class:      {row["grade"]}')
+                detail_subject.set_text(f'Subject:    {row["subject"]}')
+                detail_date.set_text(f'Date:       {row["date"]}')
+                detail_time.set_text(f'Time Slot:  {row["time_slot"]}')
+                detail_status.set_text(f'Status:     {row["status"]}')
+                detail_note.set_text(f'Note:       {row["note"]}')
+                detail_created.set_text(f'Created:    {row["created_at"]}')
+                detail_expires.set_text(f'Expires:    {row["expires_at"]}')
+                detail_dialog.open()
 
-                        with ui.card().classes('w-full rounded-xl border border-gray-100 mb-3'):
-                            with ui.row().classes('w-full items-stretch'):
-                                ui.element('div').classes('w-1 rounded-1-xl bg-yellow-400')
-                                with ui.row().classes('flex-1 p-4 justify-between items-center'):
-                                    with ui.column().classes('gap-1'):
-                                        with ui.row().classes('items-center gap-2'):
-                                            ui.icon('person').classes('text-base text-blue-400')
-                                            ui.link(
-                                                f'{teacher_pnr} ({teacher_name})',
-                                                f'/admin/teacher/{appl.teacher_id}'
-                                            ).classes('font-mono font-bold text-blue-700 hover:underline')
-                                        with ui.row().classes('items-center gap-2 text-sm text-gray-400'):
-                                            ui.icon('tag').classes('text-base')
-                                            ui.label(f'Request ID: {appl.request_id}')
-                                            ui.icon('schedule').classes('text-base ml-2')
-                                            ui.label(
-                                                appl.applied_at.strftime('%d.%m.%Y %H:%M') if appl.applied_at else '-'
-                                            )
-                                    with ui.row().classes('gap-2'):
-                                        app_id = appl.id
-                                        ui.button('Approve', icon='check',
-                                                  on_click=lambda _, a=app_id: [
-                                                      svc.approve_application(a),
-                                                      ui.navigate.to('/admin')
-                                                  ]).classes('bg-green-600 text-white rounded-lg px-4 hover:bg-green-700')
-                                        ui.button('Reject', icon='close',
-                                                  on_click=lambda _, a=app_id: [
-                                                      svc.reject_application(a),
-                                                      ui.navigate.to('/admin')
-                                                  ]).classes('bg-red-500 text-white rounded-lg px-4 hover:bg-red-600')
-                                        
-                    db.close()
+            table = ui.table(columns=columns, rows=rows).classes('w-full cursor-pointer')
+            table.on('rowClick', on_row_click)
 
-                        
+        # --- Pending Applications ---
+        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+            with ui.row().classes('items-center gap-2 mb-4'):
+                ui.icon('pending_actions').classes('text-yellow-500 text-xl')
+                ui.label('Pending Applications').classes('text-lg font-semibold')
 
+            if not pending_apps:
+                with ui.column().classes('w-full items-center py-8 text-gray-400'):
+                    ui.icon('check_circle').classes('text-4xl mb-2 text-green-400')
+                    ui.label('No pending applications at the moment.').classes('text-sm')
+            else:
+                for appl in pending_apps:
+                    from models.user import User
+                    teacher = db.query(User).filter(User.id == appl.teacher_id).first()
+                    teacher_name = teacher.full_name if teacher else f'Teacher #{appl.teacher_id}'
+                    teacher_pnr = teacher.personal_number if teacher else '-'
 
-                
-                                    
+                    with ui.card().classes('w-full rounded-xl border border-gray-100 mb-3'):
+                        with ui.row().classes('w-full items-stretch'):
+                            ui.element('div').classes('w-1 rounded-l-xl bg-yellow-400')
+                            with ui.row().classes('flex-1 p-4 justify-between items-center'):
+                                with ui.column().classes('gap-1'):
+                                    with ui.row().classes('items-center gap-2'):
+                                        ui.icon('person').classes('text-base text-blue-400')
+                                        ui.link(
+                                            f'{teacher_pnr} ({teacher_name})',
+                                            f'/admin/teacher/{appl.teacher_id}'
+                                        ).classes('font-mono font-bold text-blue-700 hover:underline')
+                                    with ui.row().classes('items-center gap-2 text-sm text-gray-400'):
+                                        ui.icon('tag').classes('text-base')
+                                        ui.label(f'Request ID: {appl.request_id}')
+                                        ui.icon('schedule').classes('text-base ml-2')
+                                        ui.label(
+                                            appl.applied_at.strftime('%d.%m.%Y %H:%M') if appl.applied_at else '-'
+                                        )
+                                with ui.row().classes('gap-2'):
+                                    app_id = appl.id
+                                    ui.button('Approve', icon='check',
+                                              on_click=lambda _, a=app_id: [
+                                                  svc.approve_application(a),
+                                                  ui.navigate.to('/admin')
+                                              ]).classes('bg-green-600 text-white rounded-lg px-4 hover:bg-green-700')
+                                    ui.button('Reject', icon='close',
+                                              on_click=lambda _, a=app_id: [
+                                                  svc.reject_application(a),
+                                                  ui.navigate.to('/admin')
+                                              ]).classes('bg-red-500 text-white rounded-lg px-4 hover:bg-red-600')
+
+        db.close()
