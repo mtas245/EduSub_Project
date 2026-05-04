@@ -4,6 +4,10 @@ from services.request_service import RequestService
 from services.application_service import ApplicationService
 from datetime import datetime
 
+# --- School ---
+SCHOOL_NAME = "Primarschule St. Johann"
+SCHOOL_ADDRESS = "Elsässerstrasse 7, 4056 Basel"
+
 
 def teacher_dashboard_view():
     db = SessionLocal()
@@ -101,6 +105,10 @@ def teacher_dashboard_view():
                                                             ui.icon('timer').classes('text-base')
                                                             ui.label(f'Expires in {hours}h')
 
+                                                    with ui.row().classes('items-center gap-1'):
+                                                        ui.icon('location_on').classes('text-base text-blue-400')
+                                                        ui.label(f'{SCHOOL_NAME} - {SCHOOL_ADDRESS}').classes('text-sm text-gray-500')
+
                                             def make_apply(rid=req.id):
                                                 def apply():
                                                     result = app_service.apply(
@@ -157,6 +165,11 @@ def teacher_dashboard_view():
                                                     with ui.row().classes('items-center gap-1'):
                                                         ui.icon('schedule').classes('text-base text-green-400')
                                                         ui.label(req.time_slot)
+
+                                                with ui.row().classes('items-center gap-1'):
+                                                    ui.icon('location_on').classes('text-base text-green-400')
+                                                    ui.label(f'{SCHOOL_NAME} - {SCHOOL_ADDRESS}').classes('text-sm text-gray-500')
+                                                    
                                                 if req.note:
                                                     with ui.row().classes('items-center gap-1 text-gray-400'):
                                                         ui.icon('notes').classes('text-base')
@@ -164,4 +177,3 @@ def teacher_dashboard_view():
                                         ui.badge('Confirmed', color='green').classes('text-white text-xs px-2 py-1')
 
         db.close()
-        
