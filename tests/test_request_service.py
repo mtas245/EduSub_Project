@@ -1,7 +1,5 @@
 import pytest
-from sqlalchemy import create_engnine
-from sqlalchemy.orm import sessionmaker
-from database import Base
+from sqlmodel import create_engine, Session, SQLModel, select
 from models.user import User, Role
 from models.request import SubstituteRequest, RequestStatus
 from models.application import Application, ApplicationStatus
@@ -13,12 +11,10 @@ from datetime import date, datetime, timedelta, timezone
 @pytest.fixture
 def db():
     """"Creates a fresh in-memory SQLite database for each test."""
-    engine = create_engnine('sqlite:///:memory:')
-    Base.metadata.create_all(bind=engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    yield session
-    session.close()
+    engine = create_engine('sqlite:///:memory:')
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
 
 @pytest.fixture
 def admin_user(db):
@@ -112,7 +108,8 @@ def test_expired_request_is_deleted(db, admin_user, service: RequestService):
 
     deleted = service.delete_expired_requests()
     assert deleted == 1
-    assert db.query(SubstituteRequest).count() == 0
+    from sqlmodel import select
+    assert len(db.exec(select(SubstituteRequest)).all()) == 0
 
 def test_valid_request_is_not_deleted(db, admin_user, service: RequestService):
     """A request expiring in 2 hours must NOT be deleted."""
@@ -130,7 +127,7 @@ def test_valid_request_is_not_deleted(db, admin_user, service: RequestService):
     deleted = service.delete_expired_requests()
 
     assert deleted == 0
-    assert db.query(SubstituteRequest).count() == 1
+    assert len(db.exec(select(SubstituteRequest)).all()) == 1
 
 # --- Parameterize: Grade Filter ---
 
@@ -207,3 +204,81 @@ def test_request_str(sample_request: SubstituteRequest):
     assert 'Mathematics' in s
     assert '3a' in s
     
+# --- Application Tests ---
+
+@pytest.fixture
+def teacher_user(db):
+    """Creates a test teacher user."""
+    user = User(
+        id=2,
+        email='teacher@test.com',
+        password_hash='fakehash',
+        full_name='Test Teacher',
+        role=Role.TEACHER
+    )
+    db.add(user)
+    db.commit()
+    return user
+
+def test_approve_application(db, admin_user, teacher_user, service: RequestService):
+    """Approving an application sets status to APPROVED and request to FILLED."""
+    req = service.create_request(
+        subject='German', grade_level='2a',
+        date_obj=date(2026, 6, 1), note='', admin_id=admin_user.id
+    )
+    appl = Application(teacher_id=teacher_user.id, request_id=req.id)
+    db.add(appl)
+    db.commit()
+
+    result = service.approve_application(appl.id)
+
+    assert result is True
+    db.refresh(appl)
+    db.refresh(req)
+    assert appl.status == ApplicationStatus.APPROVED
+    assert req.status == RequestStatus.FILLED
+
+def test_reject_application(db, admin_user, teacher_user, service: RequestService):
+    """Rejecting an application sets status to REJECTED."""
+    req = service.create_request(
+        subject='PE', grade_level='4b',
+        date_obj=date(2026, 6, 2), note='', admin_id=admin_user.id
+    )
+    appl = Application(teacher_id=teacher_user.id, request_id=req.id)
+    db.add(appl)
+    db.commit()
+
+    result = service.reject_application(appl.id)
+
+    assert result is True
+    db.refresh(appl)
+    assert appl.status == ApplicationStatus.REJECTED
+
+def test_get_pending_applications(db, admin_user, teacher_user, service: RequestService):
+    """get_pending_applications returns only PENDING applications."""
+    req = service.create_request(
+        subject='Music', grade_level='1a',
+        date_obj=date(2026, 6, 3), note='', admin_id=admin_user.id
+    )
+    appl = Application(teacher_id=teacher_user.id, request_id=req.id,
+                       status=ApplicationStatus.PENDING)
+    db.add(appl)
+    db.commit()
+
+    pending = service.get_pending_applications()
+    assert len(pending) == 1
+
+def test_get_approved_assignments_for_teacher(db, admin_user, teacher_user, service: RequestService):
+    """get_approved_assignments_for_teacher returns only approved requests."""
+    req = service.create_request(
+        subject='French', grade_level='5a',
+        date_obj=date(2026, 6, 4), note='', admin_id=admin_user.id
+    )
+    appl = Application(teacher_id=teacher_user.id, request_id=req.id,
+                       status=ApplicationStatus.APPROVED)
+    db.add(appl)
+    db.commit()
+
+    assignments = service.get_approved_assignments_for_teacher(teacher_user.id)
+    assert len(assignments) == 1
+    assert assignments[0].subject == 'French'
