@@ -2,11 +2,17 @@ from nicegui import ui, app
 from database import SessionLocal
 from services.request_service import RequestService
 from services.application_service import ApplicationService
+from models.subject import Subject
+from sqlmodel import select
 from datetime import datetime
 
-# --- School ---
 SCHOOL_NAME = "Primarschule St. Johann"
 SCHOOL_ADDRESS = "Elsässerstrasse 7, 4056 Basel"
+
+
+def get_subject_name(db, subject_id: int) -> str:
+    s = db.get(Subject, subject_id)
+    return s.name if s else f'#{subject_id}'
 
 
 def teacher_dashboard_view():
@@ -86,7 +92,7 @@ def teacher_dashboard_view():
                                     with ui.column().classes('flex-1 p-4 gap-1'):
                                         with ui.row().classes('w-full justify-between items-start'):
                                             with ui.column().classes('gap-1'):
-                                                ui.label(f'{req.grade_level} – {req.subject}').classes(
+                                                ui.label(f'{req.grade_level} – {get_subject_name(db, req.subject_id)}').classes(
                                                     'text-lg font-bold text-gray-800')
                                                 with ui.row().classes('gap-4 text-sm text-gray-500 mt-1'):
                                                     with ui.row().classes('items-center gap-1'):
@@ -155,7 +161,7 @@ def teacher_dashboard_view():
                                 with ui.column().classes('flex-1 p-4 gap-1'):
                                     with ui.row().classes('w-full justify-between items-start'):
                                         with ui.column().classes('gap-1'):
-                                            ui.label(f'{req.grade_level} – {req.subject}').classes(
+                                            ui.label(f'{req.grade_level} – {get_subject_name(db, req.subject_id)}').classes(
                                                 'text-lg font-bold text-gray-800')
                                             with ui.row().classes('gap-4 text-sm text-gray-500 mt-1'):
                                                 with ui.row().classes('items-center gap-1'):
@@ -165,11 +171,9 @@ def teacher_dashboard_view():
                                                     with ui.row().classes('items-center gap-1'):
                                                         ui.icon('schedule').classes('text-base text-green-400')
                                                         ui.label(req.time_slot)
-
                                                 with ui.row().classes('items-center gap-1'):
                                                     ui.icon('location_on').classes('text-base text-green-400')
                                                     ui.label(f'{SCHOOL_NAME} - {SCHOOL_ADDRESS}').classes('text-sm text-gray-500')
-                                                    
                                                 if req.note:
                                                     with ui.row().classes('items-center gap-1 text-gray-400'):
                                                         ui.icon('notes').classes('text-base')
@@ -177,3 +181,4 @@ def teacher_dashboard_view():
                                         ui.badge('Confirmed', color='green').classes('text-white text-xs px-2 py-1')
 
         db.close()
+
