@@ -65,7 +65,6 @@ class RequestService:
         return assignment_dt - timedelta(hours=12)
 
     def delete_expired_requests(self) -> int:
-        """Delete all OPEN requests that have passed their expiry time."""
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         try:
             expired = self.db.exec(
