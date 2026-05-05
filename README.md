@@ -312,7 +312,7 @@ Manages users, roles, schools, and monitors system activity.
 
 > 🚧 Insert your UML class diagram(s). Split into multiple diagrams if needed.
 
-![UML Class Diagram](docs/architecture-diagrams/uml_class_architecture.png)
+![Architecture Diagram](docs/architecture-diagrams/UML_class_architecture.png)
 
 **Layers / components:**
 - UI (NiceGUI pages/components, browser as thin client)
