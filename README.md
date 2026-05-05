@@ -214,17 +214,21 @@ The admin reviews historical assignment data.
 
 ---
 
-### 10. 
+### 10. Prevent Double Booking / Secure Assignment
 **User Story:**  
-
+As the system, I want to prevent multiple teachers from accepting the same request so that scheduling conflicts are avoided.
 
 **Description:**  
+When a substitute teacher tries to accept a request, the system checks whether the request has already been accepted by another teacher. If so, the system blocks the action and informs the user.
 
 **Inputs:**
-
+- request_id   
+- logged-in session
 
 **Outputs:**
-
+- success confirmation if request is still available
+- error message if request is already assigned
+- request status remains consistent
 ---
 
 ### Use cases
