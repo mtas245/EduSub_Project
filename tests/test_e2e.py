@@ -3,13 +3,15 @@ from sqlmodel import create_engine, Session, SQLModel, select
 from datetime import date
 from models.user import User, Role
 from models.request import SubstituteRequest, RequestStatus
+from models.subject import Subject
 from models.application import Application, ApplicationStatus
 from services.application_service import ApplicationService
 from services.request_service import RequestService
 
+
 @pytest.fixture
 def db():
-    """Creates a fresh in-memory SQLite database for the E2E test."""
+    """Creates a fresh in-memory SQlite database for the E2E test."""
     engine = create_engine("sqlite:///:memory:")
     SQLModel.metadata.create_all(engine)
     session = Session(engine)
@@ -24,7 +26,6 @@ def test_full_substitution_workflow(db):
     3. Admin approves the application
     4. Request status -> FILLED, Application status -> APPROVED
     """
-    # --- Setup: Admin and Teacher ---
     admin = User(
         full_name='Admin',
         email='admin@edusub.ch',
@@ -35,17 +36,18 @@ def test_full_substitution_workflow(db):
     teacher = User(
         full_name='Jane Teacher', email='jane@edusub.ch',
         password_hash='x', role=Role.TEACHER,
-        personal_number='LP-2026-0042')
-    
-    db.add_all([admin, teacher])
+        personal_number='LP-2026-0042'
+    )
+    french = Subject(name='Fench', level='Primary', grades='3,4,5,6')
+    db.add_all([admin, teacher, french])
     db.commit()
 
     req_svc = RequestService(db)
     app_svc = ApplicationService(db)
 
-    #--- Step 1: Admin creates a request---
+    # --- Step 1: Admin creates a request ---
     request = req_svc.create_request(
-        subject='French',
+        subject_id=french.id,
         grade_level='4a',
         date_obj=date(2026, 5, 20),
         note='',
@@ -53,7 +55,7 @@ def test_full_substitution_workflow(db):
     )
     assert request.status == RequestStatus.OPEN
 
-    #--- Step 2: Teacher applies---
+    # --- Step 2: Teacher applies ---
     result = app_svc.apply(
         teacher_id=teacher.id,
         request_id=request.id
@@ -69,32 +71,33 @@ def test_full_substitution_workflow(db):
     assert application is not None
     assert application.status == ApplicationStatus.PENDING
 
-    #---- Step 3: Admin approves---
+    # --- Step 3: Admin approves ---
     approved = req_svc.approve_application(application.id)
     assert approved is True
 
-    #--- Step 4: Verify final result---
+    # --- Step 4: Verify final result ---
     db.refresh(request)
     db.refresh(application)
     assert request.status == RequestStatus.FILLED
     assert application.status == ApplicationStatus.APPROVED
 
 def test_duplicate_application_is_rejected(db):
-    """A teacher cannot apply twice for the same rewquest."""
+    """A teacher cannot apply twice for the same request."""
     admin = User(full_name='Admin', email='admin2@edusub.ch',
                  password_hash='x', role=Role.ADMIN,
                  personal_number='LP-2026-0002')
     teacher = User(full_name='John Teacher', email='john@edusub.ch',
                    password_hash='x', role=Role.TEACHER,
                    personal_number='LP-2026-0043')
-    db.add_all([admin, teacher])
+    math = Subject(name='Mathematics', level='Primary', grades='1,2,3,4,5,6')
+    db.add_all([admin, teacher, math])
     db.commit()
 
     req_svc = RequestService(db)
     app_svc = ApplicationService(db)
 
     request = req_svc.create_request(
-        subject='Math', grade_level='3a',
+        subject_id=math.id, grade_level='3a',
         date_obj=date(2026, 5, 21), note='', admin_id=admin.id
     )
 
@@ -102,7 +105,10 @@ def test_duplicate_application_is_rejected(db):
     result1 = app_svc.apply(teacher_id=teacher.id, request_id=request.id)
     assert result1['success'] is True
 
-    # Second application shoul be rejeected
+    # Second application should be rejected
     result2 = app_svc.apply(teacher_id=teacher.id, request_id=request.id)
     assert result2['success'] is False
     assert 'already applied' in result2['message'].lower()
+
+    
+
