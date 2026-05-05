@@ -18,10 +18,13 @@ class User(SQLModel, table=True):
 
     personal_number: Optional[str] = Field(default=None, unique=True)
     phone: Optional[str] = Field(default=None)
-    subjects: Optional[str] = Field(default=None)  # Comma-separated subject names
     bio: Optional[str] = Field(default=None)
+    documents_path: Optional[str] = Field(default=None)
 
     created_at: Optional[datetime] = Field(default_factory=datetime.now)
 
     def __repr__(self):
         return f'<User {self.email} ({self.role})>'
+    
+
+   
