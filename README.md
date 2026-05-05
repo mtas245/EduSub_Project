@@ -315,24 +315,24 @@ Manages users, roles, schools, and monitors system activity.
 ![Architecture Diagram](docs/architecture-diagrams/UML_class_architecture.png)
 
 **Layers / components:**
-- UI (NiceGUI pages/components, browser as thin client)
-- Application logic (controllers + domain/services)
-- Persistence (SQLite + ORM entities + repositories/queries)
+- **UI:** NiceGUI pages (login, register, admin_dashboard, teacher_dashboard, profile_view)
+- **Application Logic:** Controllers + Services (RequestService, ApplicationService, ProfileService)
+- **Persistence:** SQLite + SQLModel ORM + SessionLocal
 
-**Design decisions (examples):**
-- Organize code using **MVC**:
-   - **Model:** domain + ORM entities (e.g. `models.py`)
-   - **View:** NiceGUI UI components/pages
-   - **Controller:** event handlers and coordination logic between UI, services, and persistence
-- Separate UI (`app/main.py`) from domain logic (e.g. `pricing.py`) and persistence (e.g. `models.py`, `db.py`)
-- Use and interaction of modules to minimize dependencies, by minimizing cohesion and maximizing coupling
-- Keep business rules testable without starting the UI
+**Design decisions:**
+- MVC structure:
+   * Model: ORM entities (User, SubstituteRequest, Application, Subject)
+   * View: NiceGUI pages
+   * Controller: UI event handlers calling service methods
+* Clear separation of concerns (UI, logic, database)
+* Business logic is independent of UI (services can be tested separately)
+* Modular structure to reduce dependencies and improve maintainability
 
 **Design patterns used (examples):**
-- MVC (Model–View–Controller)
-- Repository/DAO for database access (e.g. `queries.py`)
-- Strategy for business rules (e.g. discount calculation)
-- Adapter for external services (e.g. invoice generation backend)
+- Model–View–Controller (MVC): separates UI, logic, and persistence
+- Service Layer Pattern: business logic is encapsulated in services
+- Repository/DAO Pattern: database access via ORM (no raw SQL)
+- Facade Pattern: database.py hides database setup and session handling
 
 ---
 
