@@ -1,7 +1,10 @@
 from nicegui import ui, app
 from models.request import GRADE_LEVELS
+from models.subject import Subject, DEFAULT_SUBJECTS
+from models.user import User
 from database import SessionLocal
 from services.request_service import RequestService
+from sqlmodel import select
 from datetime import date, datetime, timedelta
 import re
 
@@ -12,9 +15,8 @@ SUBJECTS_BY_GRADE = {
     'Grade56': ['German', 'Mathematics', 'LNMG', 'Textiles & Crafts', 'Art (BG)', 'PE', 'Music', 'French', 'English'],
 }
 
-GRADE_LEVELS = GRADE_LEVELS
 
-def get_subjects_for_grade(grade: str) -> list:
+def get_subjects_for_grade(grade: str) -> list[str]:
     if grade in ('KG1', 'KG2'):
         return SUBJECTS_BY_GRADE['KG']
     num = int(''.join(filter(str.isdigit, grade))) if any(c.isdigit() for c in grade) else 0
@@ -24,19 +26,40 @@ def get_subjects_for_grade(grade: str) -> list:
         return SUBJECTS_BY_GRADE['Grade34']
     return SUBJECTS_BY_GRADE['Grade56']
 
-def calculate_expires_at(assignment_date, time_slot: str = None):
-    from datetime import time as dt_time
-    if time_slot:
-        start_str = time_slot.split('-')[0].strip()
-        hour, minute = map(int, start_str.split(':'))
-        start_time = dt_time(hour, minute)
-    else:
-        start_time = dt_time(0, 0)
-    assignment_dt = datetime.combine(assignment_date, start_time)
-    return assignment_dt - timedelta(hours=12)
+
+def get_subject_id(db, name: str) -> int | None:
+    """Look up a Subject by name and return its id."""
+    subject = db.exec(select(Subject).where(Subject.name == name)).first()
+    if not subject:
+        # Seed if missing
+        for s in DEFAULT_SUBJECTS:
+            if s['name'] == name:
+                subject = Subject(name=s['name'], level=s['level'], grades=s['grades'])
+                db.add(subject)
+                db.commit()
+                db.refresh(subject)
+                break
+    return subject.id if subject else None
+
+
+def get_subject_name(db, subject_id: int) -> str:
+    """Look up a Subject name by id."""
+    subject = db.get(Subject, subject_id)
+    return subject.name if subject else f'#{subject_id}'
+
+
+def seed_subjects(db) -> None:
+    """Insert DEFAULT_SUBJECTS into DB if table is empty."""
+    existing = db.exec(select(Subject)).all()
+    if not existing:
+        for s in DEFAULT_SUBJECTS:
+            db.add(Subject(name=s['name'], level=s['level'], grades=s['grades']))
+        db.commit()
+
 
 def admin_dashboard():
     db = SessionLocal()
+    seed_subjects(db)
     svc = RequestService(db)
     full_name = app.storage.user.get('full_name', 'Admin')
     admin_id = app.storage.user.get('user_id')
@@ -98,7 +121,9 @@ def admin_dashboard():
                 note_input = ui.textarea(label='Additional Notes').classes('flex-1')
 
             def on_grade_change(e):
-                new_subjects = get_subjects_for_grade(e.value)
+                # e.args is the new value string
+                new_grade = e.args if isinstance(e.args, str) else grade_select.value
+                new_subjects = get_subjects_for_grade(new_grade)
                 subject_select.options = new_subjects
                 subject_select.value = new_subjects[0]
                 subject_select.update()
@@ -107,10 +132,10 @@ def admin_dashboard():
 
             def create_request():
                 grade = grade_select.value
-                subject = subject_select.value
+                subject_name = subject_select.value
                 dt = date_input.value
 
-                if not subject or not dt:
+                if not subject_name or not dt:
                     ui.notify('Please fill in all required fields.', color='negative')
                     return
 
@@ -120,23 +145,28 @@ def admin_dashboard():
                     ui.notify('The date cannot be in the past.', color='negative')
                     return
 
-                time_slot = time_input.value or None
+                time_slot = time_input.value.strip() or None
                 if time_slot:
                     if not re.match(r'^\d{2}:\d{2}-\d{2}:\d{2}$', time_slot):
                         ui.notify('Time slot must be in format HH:MM-HH:MM (e.g. 08:00-12:00).', color='negative')
                         return
 
-                calculate_expires_at(date_obj, time_slot)
+                subject_id = get_subject_id(db, subject_name)
+                if subject_id is None:
+                    ui.notify('Subject not found in database.', color='negative')
+                    return
+
                 req = svc.create_request(
-                    subject=subject,
+                    subject_id=subject_id,
                     grade_level=grade,
                     date_obj=date_obj,
                     time_slot=time_slot,
                     note=note_input.value,
                     admin_id=admin_id,
                 )
+                subject_display = get_subject_name(db, req.subject_id)
                 ui.notify(
-                    f'Request created: {req.subject} – {req.grade_level} on {req.date}',
+                    f'Request created: {subject_display} – {req.grade_level} on {req.date}',
                     color='positive'
                 )
                 ui.navigate.to('/admin')
@@ -163,7 +193,7 @@ def admin_dashboard():
                 {
                     'id':         r.id,
                     'grade':      r.grade_level,
-                    'subject':    r.subject,
+                    'subject':    get_subject_name(db, r.subject_id),
                     'date':       r.date.strftime('%d.%m.%Y') if r.date else '-',
                     'time_slot':  r.time_slot if r.time_slot else '-',
                     'status':     r.status.value,
@@ -214,8 +244,7 @@ def admin_dashboard():
                     ui.label('No pending applications at the moment.').classes('text-sm')
             else:
                 for appl in pending_apps:
-                    from models.user import User
-                    teacher = db.query(User).filter(User.id == appl.teacher_id).first()
+                    teacher = db.exec(select(User).where(User.id == appl.teacher_id)).first()
                     teacher_name = teacher.full_name if teacher else f'Teacher #{appl.teacher_id}'
                     teacher_pnr = teacher.personal_number if teacher else '-'
 
