@@ -342,7 +342,12 @@ Manages users, roles, schools, and monitors system activity.
 
 ![ER Diagram](docs/architecture-diagrams/EduSub_ER.png)
 
-**ORM and Entities (example):** In the database, order are stored in ... that are mapped an `Order` entity. The `Order` ↔ `OrderItem` relationship ... ensures that an `Order` has at least one `OrderItem` and an `OrderItem` always relates to an `Order`.
+**ORM and Entities:** In the database, substitute requests, users, applications, and subjects are stored and mapped to ORM entities (User, SubstituteRequest, Application, Subject).
+
+* The User ↔ SubstituteRequest relationship ensures that each request is created by one user (admin), while one user can create multiple requests.
+* The SubstituteRequest ↔ Application relationship ensures that one request can have multiple applications, but each application belongs to exactly one request.
+* The User ↔ Application relationship ensures that a teacher can apply to multiple requests, while each application belongs to one teacher.
+* The User ↔ Subject relationship is modeled via the UserSubject table, representing a many-to-many relationship (a user can have multiple subjects and a subject can belong to multiple users).
 
 ---
 
