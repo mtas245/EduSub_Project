@@ -340,7 +340,7 @@ Manages users, roles, schools, and monitors system activity.
 
 > 🚧 Describe the database and your ORM entities. Ideally, a diagram documents the database and it is described together with the ORM entities.
 
-![ER Diagram](docs/architecture-diagrams/EduSub_ER_fixed.png)
+![ER Diagram](docs/architecture-diagrams/EduSub_ER.png)
 
 **ORM and Entities (example):** In the database, order are stored in ... that are mapped an `Order` entity. The `Order` ↔ `OrderItem` relationship ... ensures that an `Order` has at least one `OrderItem` and an `OrderItem` always relates to an `Order`.
 
