@@ -152,7 +152,7 @@ def test_get_subjects_empty(db, teacher, service):
 
 def test_set_and_get_subjects(db, teacher, subject_math, subject_pe, service):
     """set_subjects saves and get_subjects retrieves correctly."""
-    service.set_subjects(teacher.id[subject_math.id, subject_pe.id])
+    service.set_subjects(teacher.id, [subject_math.id, subject_pe.id])
     subjects = service.get_subjects(teacher.id)
     names = {s.name for s in subjects}
     assert names == {'Mathematics', 'PE'}
@@ -167,7 +167,7 @@ def test_set_subjects_replaces_existing(db, teacher, subject_math, subject_pe, s
 
 def test_set_subjects_empty_clears_all(db, teacher, subject_math, service):
     """set_subjects with empty list removes all assignments."""
-    service.get_subjects(teacher.id, [subject_math.id])
+    service.set_subjects(teacher.id, [subject_math.id])
     service.set_subjects(teacher.id, [])
     assert service.get_subjects(teacher.id) == []
-    
+
