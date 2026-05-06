@@ -1,14 +1,12 @@
 from nicegui import ui, app
-from sqlalchemy.orm import Session
 from database import SessionLocal
-from auth import login_user
-from models import user
-from models.user import Role
+from auth import login_user, verify_password
+from models.user import Role, User
+from sqlmodel import select
 
 def login_page():
-    '''Render the login page.'''
+    """Render the login page."""
 
-    # If already logged in, redirect immediately
     if app.storage.user.get('logged_in'):
         role = app.storage.user.get('role')
         if role == 'admin':
@@ -16,7 +14,7 @@ def login_page():
         else:
             ui.navigate.to('/teacher')
         return
-
+    
     with ui.card().classes('absolute-center').style('width:380px; padding:2rem;'):
         ui.label('EduSub').classes('text-2xl font-bold text-blue-700')
         ui.label('Sign in to your account').classes('text-gray-500 mb-4')
@@ -32,16 +30,25 @@ def login_page():
             if not email or not password:
                 error_label.set_text('Please fill in all fields.')
                 return
-            db: Session = SessionLocal()
+            
+            db = SessionLocal()
             try:
+                raw_user = db.exec(select(User).where(User.email == email)).first()
+                if (raw_user
+                        and raw_user.role == Role.TEACHER
+                        and not raw_user.is_approved
+                        and verify_password(password, raw_user.password_hash)):
+                    error_label.set_text('Your account is pending admin approval.')
+                    return
+                
                 user = login_user(db, email, password)
             finally:
                 db.close()
 
             if not user:
-                error_label.set_text('Invalid email or password')
-                return
-
+                error_label.set_text('Invalid email or password.')
+                return 
+            
             app.storage.user['logged_in'] = True
             app.storage.user['user_id'] = user.id
             app.storage.user['full_name'] = user.full_name
@@ -58,3 +65,4 @@ def login_page():
         ui.separator()
         ui.label('No account yet?').classes('text-sm text-gray-400')
         ui.link('Register here', '/register').classes('text-sm text-blue-600')
+        
