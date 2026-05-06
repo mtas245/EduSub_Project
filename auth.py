@@ -27,6 +27,8 @@ def register_user(
     if existing:
         return None
     
+    is_approved = Role(role) == Role.ADMIN
+    
     new_user = User(
         email=email,
         full_name=full_name,
@@ -34,6 +36,7 @@ def register_user(
         role=Role(role),
         phone=phone,
         documents_path=documents_path,
+        is_approved=is_approved,
     )
     db.add(new_user)
     db.flush()
@@ -51,6 +54,8 @@ def login_user(db: Session, email: str, password: str) -> User | None:
     if not user:
         return None
     if not verify_password(password, user.password_hash):
+        return None
+    if user.role == Role.TEACHER and not user.is_approved:
         return None
     return user
 

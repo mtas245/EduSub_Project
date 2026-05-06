@@ -35,11 +35,10 @@ def register_page():
             ui.label('Accepted: PDF, JPG, PNG').classes('text-xs text-gray-400 mb-2')
             upload_status = ui.label('No files uploaded yet.').classes('text-xs text-gray-400')
 
-            def handle_uploade(e: events.UploadEventArguments):
-                filename = e.name
+            async def handle_uploade(e: events.UploadEventArguments):
+                filename = e.file.name
                 dest_path = os.path.join(UPLOAD_DIR, filename)
-                with open(dest_path, 'wb') as f:
-                    f.write(e.content.read())
+                await e.file.save(dest_path)
                 uploaded_files.append(dest_path)
                 upload_status.set_text(f'{len(uploaded_files)} file(s) uploaded: {", ".join(os.path.basename(p) for p in uploaded_files)}')
 

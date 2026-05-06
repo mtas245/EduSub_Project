@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from models.user import User
+from models.user import User, Role
 from models.subject import Subject, UserSubject
 
 
@@ -48,3 +48,29 @@ class ProfileService:
         for sid in subject_ids:
             self.db.add(UserSubject(user_id=user_id, subject_id=sid))
         self.db.commit()
+
+    def get_pending_teachers(self) -> list[User]:
+        """Returns all teachers waiting for approval."""
+        return self.db.exec(
+            select(User)
+            .where(User.role == Role.TEACHER, User.is_approved == False)
+            .order_by(User.created_at.asc())
+        ).all()
+
+    def approve_teacher(self, user_id: int) -> bool:
+        """Approves a teacher account. Returns True if successful."""
+        user = self.db.get(User, user_id)
+        if not user or user.role != Role.TEACHER:
+            return False
+        user.is_approved = True
+        self.db.commit()
+        return True
+
+    def reject_teacher(self, user_id: int) -> bool:
+        """Deletes a rejected teacher account. Returns True if successful."""
+        user = self.db.get(User, user_id)
+        if not user or user.role != Role.TEACHER:
+            return False
+        self.db.delete(user)
+        self.db.commit()
+        return True

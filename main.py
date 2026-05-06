@@ -9,6 +9,9 @@ from views.register import register_page
 from views.admin_dashboard import admin_dashboard
 from views.teacher_dashboard import teacher_dashboard_view
 from views.profile import profile_view
+from fastapi.staticfiles import StaticFiles
+import os
+
 
 def require_login(allowed_roles: list[str]):
     """"
@@ -72,6 +75,9 @@ def admin_teacher_profile(teacher_id: int):
         return
     from views.admin_teacher_profile import admin_teacher_profile_view
     admin_teacher_profile_view(teacher_id)
+
+os.makedirs('uploads/documents', exist_ok=True)
+app.mount('/uploads', StaticFiles(directory='uploads'), name='uploads')
 
 if __name__ in {'__main__', '__mp_main__'}:
     create_db()

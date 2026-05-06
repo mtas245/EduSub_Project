@@ -4,6 +4,7 @@ from models.subject import Subject, DEFAULT_SUBJECTS
 from models.user import User
 from database import SessionLocal
 from services.request_service import RequestService
+from services.profile_service import ProfileService
 from sqlmodel import select
 from datetime import date, datetime, timedelta
 import re
@@ -31,7 +32,6 @@ def get_subject_id(db, name: str) -> int | None:
     """Look up a Subject by name and return its id."""
     subject = db.exec(select(Subject).where(Subject.name == name)).first()
     if not subject:
-        # Seed if missing
         for s in DEFAULT_SUBJECTS:
             if s['name'] == name:
                 subject = Subject(name=s['name'], level=s['level'], grades=s['grades'])
@@ -61,6 +61,7 @@ def admin_dashboard():
     db = SessionLocal()
     seed_subjects(db)
     svc = RequestService(db)
+    profile_svc = ProfileService(db)
     full_name = app.storage.user.get('full_name', 'Admin')
     admin_id = app.storage.user.get('user_id')
 
@@ -80,6 +81,7 @@ def admin_dashboard():
         all_requests = svc.get_all_requests()
         open_requests = svc.get_open_requests()
         pending_apps = svc.get_pending_applications()
+        pending_teachers = profile_svc.get_pending_teachers()
 
         # --- Stats ---
         with ui.row().classes('w-full gap-4'):
@@ -95,6 +97,10 @@ def admin_dashboard():
                 ui.icon('pending_actions').classes('text-yellow-400 text-2xl')
                 ui.label(str(len(pending_apps))).classes('text-4xl font-bold text-yellow-600')
                 ui.label('Pending Applications').classes('text-gray-400 text-sm mt-1')
+            with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
+                ui.icon('person_add').classes('text-blue-400 text-2xl')
+                ui.label(str(len(pending_teachers))).classes('text-4xl font-bold text-blue-600')
+                ui.label('Pending Teachers').classes('text-gray-400 text-sm mt-1')
 
         # --- Create Request ---
         with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
@@ -121,7 +127,6 @@ def admin_dashboard():
                 note_input = ui.textarea(label='Additional Notes').classes('flex-1')
 
             def on_grade_change(e):
-                # e.args is the new value string
                 new_grade = e.args if isinstance(e.args, str) else grade_select.value
                 new_subjects = get_subjects_for_grade(new_grade)
                 subject_select.options = new_subjects
@@ -276,6 +281,51 @@ def admin_dashboard():
                                     ui.button('Reject', icon='close',
                                               on_click=lambda _, a=app_id: [
                                                   svc.reject_application(a),
+                                                  ui.navigate.to('/admin')
+                                              ]).classes('bg-red-500 text-white rounded-lg px-4 hover:bg-red-600')
+
+        # --- Pending Teacher Approvals ---
+        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+            with ui.row().classes('items-center gap-2 mb-4'):
+                ui.icon('person_add').classes('text-blue-500 text-xl')
+                ui.label('Pending Teacher Approvals').classes('text-lg font-semibold')
+
+            if not pending_teachers:
+                with ui.column().classes('w-full items-center py-8 text-gray-400'):
+                    ui.icon('check_circle').classes('text-4xl mb-2 text-green-400')
+                    ui.label('No pending teacher approvals.').classes('text-sm')
+            else:
+                for teacher in pending_teachers:
+                    with ui.card().classes('w-full rounded-xl border border-gray-100 mb-3'):
+                        with ui.row().classes('w-full items-stretch'):
+                            ui.element('div').classes('w-1 rounded-l-xl bg-blue-400')
+                            with ui.row().classes('flex-1 p-4 justify-between items-center'):
+                                with ui.column().classes('gap-1'):
+                                    with ui.row().classes('items-center gap-2'):
+                                        ui.icon('person').classes('text-base text-blue-400')
+                                        ui.link(
+                                            f'{teacher.personal_number} ({teacher.full_name})',
+                                            f'/admin/teacher/{teacher.id}'
+                                        ).classes('font-mono font-bold text-blue-700 hover:underline')
+                                    with ui.row().classes('items-center gap-2 text-sm text-gray-400'):
+                                        ui.icon('email').classes('text-base')
+                                        ui.label(teacher.email)
+                                        if teacher.phone:
+                                            ui.icon('phone').classes('text-base ml-2')
+                                            ui.label(teacher.phone)
+                                        if teacher.documents_path:
+                                            ui.icon('attach_file').classes('text-base ml-2')
+                                            ui.label(f'{len(teacher.documents_path.split(","))} document(s)')
+                                with ui.row().classes('gap-2'):
+                                    t_id = teacher.id
+                                    ui.button('Approve', icon='check',
+                                              on_click=lambda _, tid=t_id: [
+                                                  profile_svc.approve_teacher(tid),
+                                                  ui.navigate.to('/admin')
+                                              ]).classes('bg-green-600 text-white rounded-lg px-4 hover:bg-green-700')
+                                    ui.button('Reject', icon='close',
+                                              on_click=lambda _, tid=t_id: [
+                                                  profile_svc.reject_teacher(tid),
                                                   ui.navigate.to('/admin')
                                               ]).classes('bg-red-500 text-white rounded-lg px-4 hover:bg-red-600')
 

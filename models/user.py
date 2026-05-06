@@ -20,11 +20,10 @@ class User(SQLModel, table=True):
     phone: Optional[str] = Field(default=None)
     bio: Optional[str] = Field(default=None)
     documents_path: Optional[str] = Field(default=None)
+    is_approved: bool = Field(default=False)
 
     created_at: Optional[datetime] = Field(default_factory=datetime.now)
 
     def __repr__(self):
         return f'<User {self.email} ({self.role})>'
     
-
-   
