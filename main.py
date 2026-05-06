@@ -37,6 +37,19 @@ def seed_subjects():
                 ))
             session.commit()
 
+def seed_default_users():
+    from sqlmodel import Session, select
+    from auth import register_user
+    with Session(engine) as session:
+        if session.exec(select(User)).first() is None:
+            register_user(session, 'admin@edusub.ch', 'Admin User', 'admin123', 'admin', phone='0791234567')
+            teacher= register_user(session, 'teacher@edusub.ch', 'Jane Teacher', 'teacher123', 'teacher', phone='0797654321')
+
+            if teacher:
+                teacher.is_approved = True
+                session.commit()
+            print('Default users created: admin@edusub.ch / admin123 | teacher@edusub.ch / teacher123')
+
 
 @ui.page('/')
 def index():
@@ -82,6 +95,7 @@ app.mount('/uploads', StaticFiles(directory='uploads'), name='uploads')
 if __name__ in {'__main__', '__mp_main__'}:
     create_db()
     seed_subjects()
+    seed_default_users()
     ui.run(
         title='EduSub',
         storage_secret='EduSub-secret-key-change-in-prod',
