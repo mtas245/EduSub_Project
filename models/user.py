@@ -20,6 +20,7 @@ class User(SQLModel, table=True):
     phone: Optional[str] = Field(default=None)
     bio: Optional[str] = Field(default=None)
     documents_path: Optional[str] = Field(default=None)
+    profile_picture: Optional[str] = Field(default=None)
     is_approved: bool = Field(default=False)
 
     created_at: Optional[datetime] = Field(default_factory=datetime.now)

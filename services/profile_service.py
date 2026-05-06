@@ -19,7 +19,7 @@ class ProfileService:
         user = self.db.get(User, user_id)
         if not user:
             return None
-        for field in ['full_name', 'phone', 'bio', 'documents_path']:
+        for field in ['full_name', 'phone', 'bio', 'documents_path', 'profile_picture']:
             if field in kwargs:
                 setattr(user, field, kwargs[field])
         self.db.commit()
