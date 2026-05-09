@@ -369,14 +369,18 @@ Each app must meet the following criteria in order to be accepted (see also the 
 
 > 🚧 In this section, document how your project fulfills each criterion.
 
-The system is fully browser-based and built using NiceGUI.
-The browser acts as a thin client while business logic and state management are handled server-side.
+EduSub is a fully browser-based web application built with NiceGUI. The browser acts as a thin client, while UI state, routing, session handling, and business logic are handled server-side.
 
 Users can:
-– Log in
-– Create and manage substitute requests
-– Accept assignments
-– View assignment history
+- register and log in
+- access role-based dashboards
+- create and manage substitute requests
+- view open substitute assignments
+- apply for assignments
+- approve or reject applications
+- view assignment and request history
+
+The application uses NiceGUI pages such as `login_page`, `register_page`, `admin_dashboard`, `teacher_dashboard`, and `profile_view`.
 
 **Architecture note (per SS26 guidelines):** the browser is a thin client; UI state + business logic live on the server-side NiceGUI app.
 
@@ -384,22 +388,45 @@ Users can:
 
 ### 2. Data Validation
 
-The application validates all user input to ensure data integrity, consistency, and a reliable coordination process.
-Validation includes required fields when creating substitute requests (date, time range, school, subject), logical checks for valid time intervals, and role-based permission checks to ensure that only authorized users can perform specific actions.
-Additionally, the system prevents double bookings by checking for overlapping assignments before allowing a substitute teacher to accept a request.
-These checks prevent inconsistent data, system errors, and scheduling conflicts, while guiding users to provide correct and complete information.
+
+The application validates user input to ensure data integrity and a reliable coordination process.
+
+Validation includes:
+
+- required fields during registration and login
+- password length validation
+- unique email check during registration
+- required fields when creating substitute requests
+- date validation to prevent requests in the past
+- time slot format validation
+- role-based access control for protected pages
+- duplicate application prevention
+- request status checks before accepting or approving applications
+
+These checks prevent inconsistent data, unauthorized access, duplicate applications, and scheduling conflicts.
 
 ---
 
 ### 3. Database Management
 
-All data is managed via an ORM (SQLAlchemy or SQLModel).
-The SQLite database persists:
-– Users
-– Schools
-– Subjects
-– Requests
-– Assignments
+All persistent data is managed using an ORM with a SQLite database. The ORM maps Python classes to database tables and allows database operations without raw SQL.
+
+The database stores:
+
+- users
+- substitute requests
+- applications
+- subjects
+- user-subject relationships
+
+Main ORM entities:
+
+- `User`
+- `SubstituteRequest`
+- `Application`
+- `Subject`
+
+The persistence layer uses `SessionLocal` for database sessions and service classes such as `RequestService`, `ApplicationService`, and `ProfileService` to access and update data.
 
 ---
 
