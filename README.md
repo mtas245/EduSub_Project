@@ -515,6 +515,8 @@ Order Pizza:
 
 > 🚧 Explain what you test and how to run tests.
 
+![Test Coverage](docs/test-images/Bild.png)
+
 **Types (examples):**
 - Unit tests: pricing/discount rules, validators
 - Integration tests: ORM mappings + queries against a test SQLite DB
