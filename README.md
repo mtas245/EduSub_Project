@@ -572,9 +572,9 @@ pytest
 
 | Name      | Contribution |
 |-----------|--------------|
-| Ata Erduran | Teacher Dashboard, Application model, ApplicationService (apply, list, validation) |
-| Ahmet Iyidogan | Authentication, User model, Login/Register views, database setup, route guard, and main application routing |
-| Mert Kirtas | Admin Dashboard, SubstituteRequest model, RequestService (create, list, approve, reject), and request management logic |
+| Ata Erduran | application.py, application_service, teacher_dashboard.py, profile_service.py, profile.py, main.py, test_e2e.py, README.md |
+| Ahmet Iyidogan | database.py, user.py, auth.py, login.py, subject.py, request.py, register.py, main.py, README.md |
+| Mert Kirtas | request.py, request_service.py, admin_dashboard.py, main.py, test_request_service.py |
 
 ---
 
