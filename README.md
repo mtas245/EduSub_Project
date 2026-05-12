@@ -544,9 +544,171 @@ Order Pizza:
 
 ![Test Coverage](docs/test-images/Bild.png)
 
-**Types (examples):**
-- Unit tests: pricing/discount rules, validators
-- Integration tests: ORM mappings + queries against a test SQLite DB
+## Test Cases
+
+### TC_001 – Unit Test: Password Hashing and Verification
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_001 |
+| Test case title/description | Verify that a password is hashed and can be verified correctly |
+| Preconditions | Auth module is available |
+| Test steps | 1. Enter a plain password<br>2. Hash the password<br>3. Verify the plain password against the hash |
+| Test data/input | Password: `Password@123` |
+| Expected result | Password hash is created and verification returns True |
+| Actual result | Password hash is created and verification returns True |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_002 – Unit Test: Create Substitute Request
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_002 |
+| Test case title/description | Verify that a school manager can create a substitute request |
+| Preconditions | Admin user exists |
+| Test steps | 1. Create request with subject, grade, date and note<br>2. Save request<br>3. Check request status |
+| Test data/input | Subject: `Mathematics`<br>Grade: `3a`<br>Date: `2026-05-20` |
+| Expected result | Request is created and status is set to `open` |
+| Actual result | Request is created and status is set to `open` |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_003 – Unit Test: View Open Requests
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_003 |
+| Test case title/description | Verify that only open requests are returned |
+| Preconditions | At least one open and one filled request exist |
+| Test steps | 1. Create open request<br>2. Mark another request as filled<br>3. Call get_open_requests() |
+| Test data/input | Request status: `open`, `filled` |
+| Expected result | Only requests with status `open` are displayed |
+| Actual result | Only requests with status `open` are displayed |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_004 – Unit Test: Prevent Duplicate Application
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_004 |
+| Test case title/description | Verify that a teacher cannot apply twice for the same request |
+| Preconditions | Teacher and open request exist |
+| Test steps | 1. Teacher applies for request<br>2. Teacher applies again for the same request |
+| Test data/input | Teacher ID: `2`<br>Request ID: `1` |
+| Expected result | First application succeeds, second application is rejected |
+| Actual result | First application succeeds, second application is rejected |
+| Status | Pass |
+| Comments | Prevents duplicate applications |
+
+---
+
+### TC_005 – Unit Test: Mark Request as Filled
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_005 |
+| Test case title/description | Verify that a request can be marked as filled |
+| Preconditions | Open request exists |
+| Test steps | 1. Select open request<br>2. Mark request as filled<br>3. Check updated status |
+| Test data/input | Request ID: `1` |
+| Expected result | Request status changes from `open` to `filled` |
+| Actual result | Request status changes from `open` to `filled` |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_006 – DB Test: Save User
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_006 |
+| Test case title/description | Verify that a user is saved correctly in the database |
+| Preconditions | Database connection is available |
+| Test steps | 1. Create user object<br>2. Save user to database<br>3. Query user by email |
+| Test data/input | Name: `Test Teacher`<br>Email: `teacher@test.com`<br>Role: `teacher` |
+| Expected result | User is stored and can be retrieved from the database |
+| Actual result | User is stored and can be retrieved from the database |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_007 – DB Test: Save Substitute Request
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_007 |
+| Test case title/description | Verify that a substitute request is persisted with all relevant fields |
+| Preconditions | Admin user exists in database |
+| Test steps | 1. Create substitute request<br>2. Save request to database<br>3. Query request from database |
+| Test data/input | Subject: `German`<br>Grade: `4b`<br>Date: `2026-06-01` |
+| Expected result | Request is saved with correct subject, grade, date and status |
+| Actual result | Request is saved with correct subject, grade, date and status |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_008 – DB Test: Save Application
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_008 |
+| Test case title/description | Verify that a teacher application is stored in the database |
+| Preconditions | Teacher and open request exist |
+| Test steps | 1. Teacher applies for request<br>2. Save application<br>3. Query application by teacher and request |
+| Test data/input | Teacher ID: `2`<br>Request ID: `1` |
+| Expected result | Application is saved with status `pending` |
+| Actual result | Application is saved with status `pending` |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_009 – Integration Test: Full Substitute Workflow
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_009 |
+| Test case title/description | Verify the full workflow from request creation to approval |
+| Preconditions | Admin and teacher accounts exist |
+| Test steps | 1. Admin creates substitute request<br>2. Teacher views open request<br>3. Teacher applies<br>4. Admin approves application<br>5. System updates statuses |
+| Test data/input | Subject: `French`<br>Grade: `4a`<br>Teacher: `Jane Teacher` |
+| Expected result | Application status becomes `approved` and request status becomes `filled` |
+| Actual result | Application status becomes `approved` and request status becomes `filled` |
+| Status | Pass |
+| Comments | End-to-end workflow works correctly |
+
+---
+
+### TC_010 – Integration Test: Secure Assignment / Double Booking Prevention
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_010 |
+| Test case title/description | Verify that double booking or duplicate assignment is prevented |
+| Preconditions | Teacher and open request exist |
+| Test steps | 1. Teacher applies for request<br>2. Same teacher tries to apply again<br>3. System checks existing application |
+| Test data/input | Teacher ID: `2`<br>Request ID: `1` |
+| Expected result | First application succeeds, second application is blocked with an error message |
+| Actual result | First application succeeds, second application is blocked with an error message |
+| Status | Pass |
+| Comments | Scheduling conflicts are prevented |
+
+
+**Types:**
+- **Unit tests:** password hashing, request creation, request status changes, duplicate application prevention, grade/request filtering
+- **Database tests:** ORM mappings, saving and retrieving users, substitute requests, applications, and subjects in a test SQLite database
+- **Integration tests:** full substitute workflow from request creation to teacher application and admin approval, including status updates and duplicate application handling
 
 **Run:**
 ```bash
