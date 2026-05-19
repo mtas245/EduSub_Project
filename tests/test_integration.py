@@ -1,5 +1,6 @@
 import pytest
 from datetime import date
+from models import subject
 from sqlmodel import SQLModel, Session, create_engine, select
 
 from models.user import User, Role
@@ -44,7 +45,7 @@ def test_full_substitution_workflow(db):
     application_service = ApplicationService(db)
 
     request = request_service.create_request(
-        subject="French",
+        subject_id=subject.id,  # Replace with the actual subject ID
         grade_level="4a",
         date_obj=date(2026, 5, 20),
         note="Substitute needed",
@@ -108,7 +109,7 @@ def test_duplicate_application_workflow_is_rejected(db):
     application_service = ApplicationService(db)
 
     request = request_service.create_request(
-        subject="Mathematics",
+        subject_id=subject.id,  # Replace with the actual subject ID
         grade_level="3a",
         date_obj=date(2026, 5, 21),
         note="",

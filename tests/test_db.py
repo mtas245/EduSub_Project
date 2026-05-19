@@ -1,5 +1,6 @@
 import pytest
 from datetime import date
+from models import subject
 from sqlmodel import SQLModel, Session, create_engine, select
 
 from models.user import User, Role
@@ -52,7 +53,7 @@ def test_save_substitute_request_persists_all_fields(db):
 
     request = SubstituteRequest(
         created_by=admin.id,
-        subject="Mathematics",
+        subject_id=subject.id,  # Replace with the actual subject ID
         grade_level="3a",
         date=date(2026, 5, 20),
         time_slot="08:00-10:00",
@@ -97,7 +98,7 @@ def test_save_application_persists_teacher_and_request_references(db):
 
     request = SubstituteRequest(
         created_by=admin.id,
-        subject="German",
+        subject_id=subject.id,  # Replace with the actual subject ID
         grade_level="4b",
         date=date(2026, 6, 1),
         status=RequestStatus.OPEN,
