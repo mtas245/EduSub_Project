@@ -1,19 +1,21 @@
 from nicegui import ui, app
-
-from database import engine, Base
-from views.admin_dashboard import admin_dashboard
-from models.user import User
-from models.request import SubstituteRequest, RequestStatus
-
-
+from database import engine, SessionLocal, create_db
+from models import User, SubstituteRequest, Application, Subject
+from models.subject import DEFAULT_SUBJECTS
+from models.request import RequestStatus
+from models.application import ApplicationStatus
 from views.login import login_page
 from views.register import register_page
+from views.admin_dashboard import admin_dashboard
+from views.teacher_dashboard import teacher_dashboard_view
+from views.profile import profile_view
+from fastapi.staticfiles import StaticFiles
+import os
+
 
 def require_login(allowed_roles: list[str]):
-    '''
-    Call at the top of any protected page.
-    Redirects to login if not authenticated or wrong role.
-    '''
+    """"
+    Redirects to login if not authenticated or wrong role."""
     if not app.storage.user.get('logged_in'):
         ui.navigate.to('/')
         return False
@@ -22,6 +24,19 @@ def require_login(allowed_roles: list[str]):
         ui.navigate.to('/')
         return False
     return True
+
+def seed_subjects():
+    from sqlmodel import Session, select
+    with Session(engine) as session:
+        if session.exec(select(Subject)).first() is None:
+            for s in DEFAULT_SUBJECTS:
+                session.add(Subject(
+                    name=s['name'],
+                    level=s['level'],
+                    grades=','.join(s['grades'])
+                ))
+            session.commit()
+
 
 @ui.page('/')
 def index():
@@ -36,7 +51,6 @@ def logout():
     app.storage.user.clear()
     ui.navigate.to('/')
 
-
 @ui.page('/admin')
 def admin():
     if not require_login(['admin']):
@@ -47,15 +61,30 @@ def admin():
 def teacher():
     if not require_login(['teacher']):
         return
-    ui.label('Teacher Dashboard – coming soon (Member C)')
+    teacher_dashboard_view()
 
+@ui.page('/profile')
+def profile():
+    if not require_login(['teacher', 'admin']):
+        return
+    profile_view()
+
+@ui.page('/admin/teacher/{teacher_id}')
+def admin_teacher_profile(teacher_id: int):
+    if not require_login(['admin']):
+        return
+    from views.admin_teacher_profile import admin_teacher_profile_view
+    admin_teacher_profile_view(teacher_id)
+
+os.makedirs('uploads/documents', exist_ok=True)
+app.mount('/uploads', StaticFiles(directory='uploads'), name='uploads')
 
 if __name__ in {'__main__', '__mp_main__'}:
-    Base.metadata.create_all(bind=engine)
-
+    create_db()
+    seed_subjects()
     ui.run(
-        title='Edumatch',
-        storage_secret='edumatch-secret-key-change-in-prod',
+        title='EduSub',
+        storage_secret='EduSub-secret-key-change-in-prod',
         port=8080,
         reload=False
     )

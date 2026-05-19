@@ -1,10 +1,10 @@
-# 🎒 EduMatch – Teacher Substitute Management System
+# 🎒 EduSub – Teacher Substitute Management System
 
 > 🚧 Replace the screenshot with one that shows your main screen.
 
 ![UI Showcase](docs/ui-images/ui_showcase.png)
 
-EduMatch is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
+EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
 ---
 
 This project is intended to:
@@ -31,7 +31,7 @@ This project is intended to:
 ---
 
 ### Problem
-In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher. This process is often handled through phone calls, emails, or spreadsheets, which can lead to delays and miscommunication. As a result, it becomes difficult to efficiently coordinate substitute assignments, track request statuses, and ensure that all classes are covered in time. EduMatch addresses this problem by providing a centralized web-based platform that streamlines the creation, management, and assignment of substitute requests, improving efficiency, transparency, and reliability in the process.
+In schools, when a teacher becomes ill or unavailable, the school management must quickly find a substitute teacher. This process is often handled through phone calls, emails, or spreadsheets, which can lead to delays and miscommunication. As a result, it becomes difficult to efficiently coordinate substitute assignments, track request statuses, and ensure that all classes are covered in time. EduSub addresses this problem by providing a centralized web-based platform that streamlines the creation, management, and assignment of substitute requests, improving efficiency, transparency, and reliability in the process.
 
 ---
 
@@ -214,17 +214,21 @@ The admin reviews historical assignment data.
 
 ---
 
-### 10. 
+### 10. Prevent Double Booking / Secure Assignment
 **User Story:**  
-
+As the system, I want to prevent multiple teachers from accepting the same request so that scheduling conflicts are avoided.
 
 **Description:**  
+When a substitute teacher tries to accept a request, the system checks whether the request has already been accepted by another teacher. If so, the system blocks the action and informs the user.
 
 **Inputs:**
-
+- request_id   
+- logged-in session
 
 **Outputs:**
-
+- success confirmation if request is still available
+- error message if request is already assigned
+- request status remains consistent
 ---
 
 ### Use cases
@@ -308,27 +312,27 @@ Manages users, roles, schools, and monitors system activity.
 
 > 🚧 Insert your UML class diagram(s). Split into multiple diagrams if needed.
 
-![UML Class Diagram](docs/architecture-diagrams/uml_class_architecture.png)
+![Architecture Diagram](docs/architecture-diagrams/UML_class_architecture.png)
 
 **Layers / components:**
-- UI (NiceGUI pages/components, browser as thin client)
-- Application logic (controllers + domain/services)
-- Persistence (SQLite + ORM entities + repositories/queries)
+- **UI:** NiceGUI pages (login, register, admin_dashboard, teacher_dashboard, profile_view)
+- **Application Logic:** Controllers + Services (RequestService, ApplicationService, ProfileService)
+- **Persistence:** SQLite + SQLModel ORM + SessionLocal
 
-**Design decisions (examples):**
-- Organize code using **MVC**:
-   - **Model:** domain + ORM entities (e.g. `models.py`)
-   - **View:** NiceGUI UI components/pages
-   - **Controller:** event handlers and coordination logic between UI, services, and persistence
-- Separate UI (`app/main.py`) from domain logic (e.g. `pricing.py`) and persistence (e.g. `models.py`, `db.py`)
-- Use and interaction of modules to minimize dependencies, by minimizing cohesion and maximizing coupling
-- Keep business rules testable without starting the UI
+**Design decisions:**
+- MVC structure:
+   * Model: ORM entities (User, SubstituteRequest, Application, Subject)
+   * View: NiceGUI pages
+   * Controller: UI event handlers calling service methods
+* Clear separation of concerns (UI, logic, database)
+* Business logic is independent of UI (services can be tested separately)
+* Modular structure to reduce dependencies and improve maintainability
 
 **Design patterns used (examples):**
-- MVC (Model–View–Controller)
-- Repository/DAO for database access (e.g. `queries.py`)
-- Strategy for business rules (e.g. discount calculation)
-- Adapter for external services (e.g. invoice generation backend)
+- Model–View–Controller (MVC): separates UI, logic, and persistence
+- Service Layer Pattern: business logic is encapsulated in services
+- Repository/DAO Pattern: database access via ORM (no raw SQL)
+- Facade Pattern: database.py hides database setup and session handling
 
 ---
 
@@ -336,9 +340,14 @@ Manages users, roles, schools, and monitors system activity.
 
 > 🚧 Describe the database and your ORM entities. Ideally, a diagram documents the database and it is described together with the ORM entities.
 
-![ER Diagram](docs/architecture-diagrams/er_diagram.png)
+![ER Diagram](docs/architecture-diagrams/EduSub_ER.png)
 
-**ORM and Entities (example):** In the database, order are stored in ... that are mapped an `Order` entity. The `Order` ↔ `OrderItem` relationship ... ensures that an `Order` has at least one `OrderItem` and an `OrderItem` always relates to an `Order`.
+**ORM and Entities:** In the database, substitute requests, users, applications, and subjects are stored and mapped to ORM entities (User, SubstituteRequest, Application, Subject).
+
+* The User ↔ SubstituteRequest relationship ensures that each request is created by one user (admin), while one user can create multiple requests.
+* The SubstituteRequest ↔ Application relationship ensures that one request can have multiple applications, but each application belongs to exactly one request.
+* The User ↔ Application relationship ensures that a teacher can apply to multiple requests, while each application belongs to one teacher.
+* The User ↔ Subject relationship is modeled via the UserSubject table, representing a many-to-many relationship (a user can have multiple subjects and a subject can belong to multiple users).
 
 ---
 
@@ -560,3 +569,4 @@ pytest
 This project is provided for **educational use only** as part of the Advanced Programming module.
 
 [MIT License](LICENSE)
+
