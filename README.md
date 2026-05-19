@@ -369,14 +369,18 @@ Each app must meet the following criteria in order to be accepted (see also the 
 
 > 🚧 In this section, document how your project fulfills each criterion.
 
-The system is fully browser-based and built using NiceGUI.
-The browser acts as a thin client while business logic and state management are handled server-side.
+EduSub is a fully browser-based web application built with NiceGUI. The browser acts as a thin client, while UI state, routing, session handling, and business logic are handled server-side.
 
 Users can:
-– Log in
-– Create and manage substitute requests
-– Accept assignments
-– View assignment history
+- register and log in
+- access role-based dashboards
+- create and manage substitute requests
+- view open substitute assignments
+- apply for assignments
+- approve or reject applications
+- view assignment and request history
+
+The application uses NiceGUI pages such as `login_page`, `register_page`, `admin_dashboard`, `teacher_dashboard`, and `profile_view`.
 
 **Architecture note (per SS26 guidelines):** the browser is a thin client; UI state + business logic live on the server-side NiceGUI app.
 
@@ -384,22 +388,45 @@ Users can:
 
 ### 2. Data Validation
 
-The application validates all user input to ensure data integrity, consistency, and a reliable coordination process.
-Validation includes required fields when creating substitute requests (date, time range, school, subject), logical checks for valid time intervals, and role-based permission checks to ensure that only authorized users can perform specific actions.
-Additionally, the system prevents double bookings by checking for overlapping assignments before allowing a substitute teacher to accept a request.
-These checks prevent inconsistent data, system errors, and scheduling conflicts, while guiding users to provide correct and complete information.
+
+The application validates user input to ensure data integrity and a reliable coordination process.
+
+Validation includes:
+
+- required fields during registration and login
+- password length validation
+- unique email check during registration
+- required fields when creating substitute requests
+- date validation to prevent requests in the past
+- time slot format validation
+- role-based access control for protected pages
+- duplicate application prevention
+- request status checks before accepting or approving applications
+
+These checks prevent inconsistent data, unauthorized access, duplicate applications, and scheduling conflicts.
 
 ---
 
 ### 3. Database Management
 
-All data is managed via an ORM (SQLAlchemy or SQLModel).
-The SQLite database persists:
-– Users
-– Schools
-– Subjects
-– Requests
-– Assignments
+All persistent data is managed using an ORM with a SQLite database. The ORM maps Python classes to database tables and allows database operations without raw SQL.
+
+The database stores:
+
+- users
+- substitute requests
+- applications
+- subjects
+- user-subject relationships
+
+Main ORM entities:
+
+- `User`
+- `SubstituteRequest`
+- `Application`
+- `Subject`
+
+The persistence layer uses `SessionLocal` for database sessions and service classes such as `RequestService`, `ApplicationService`, and `ProfileService` to access and update data.
 
 ---
 
@@ -409,92 +436,188 @@ The SQLite database persists:
 
 ### Technology
 
-– Python 3.x
-– NiceGUI
-– SQLite
-– SQLAlchemy / SQLModel
-– Pydantic (optional validation)
+| Component        | Choice    | Purpose                                                 |
+| ---------------- | --------- | ------------------------------------------------------- |
+| UI framework     | NiceGUI   | Python-native reactive web UI; no separate frontend     |
+| Database         | SQLite    | Embedded, zero-config storage in a single file          |
+| ORM              | SQLModel  | Type-safe models combining SQLAlchemy and Pydantic      |
+| Password hashing | bcrypt    | Industry-standard salted password hashing               |
+| Testing          | pytest    | Test runner with fixtures and coverage support          |
 
 ---
 
 ### 📂 Repository Structure
 
 ```text
-pizza-nicegui/
-├─ README.md
-├─ pyproject.toml                 # or requirements.txt
-├─ .env.example                   # DATABASE_URL=sqlite:///data/pizza.db
-├─ .gitignore
+edusub/
+├── main.py                     # Entry point: starts NiceGUI server on :8080
+├── requirements.txt            # Pinned Python dependencies
+├── edusub.db                   # SQLite database (auto-created on first run)
 │
-├─ docs/                          # screenshots, diagrams, additional documentation if needed
-│  ├─ ui-images/
-│  │  ├─ ui_showcase.png
-│  │  ├─ ui_menu.png
-│  │  ├─ ui_checkout.png
-│  │  ├─ wireframe_home.png
-│  │  └─ wireframe_checkout.png
-│  └─ architecture-diagrams/
-│     ├─ uml_use_case_diagram.png
-│     ├─ uml_class_architecture.png
-│     ├─ uml_class_domain.png
-│     ├─ uml_class_persistence.png
-│     └─ er_diagram.png
+├── app/
+│   ├── __init__.py             # Marks app/ as a package
+│   ├── config.py               # Settings: port, DB URL, session lifetime
+│   ├── database.py             # SQLModel engine, session helper, init_db()
+│   ├── seed.py                 # Inserts default admin and teacher on first boot
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py             # User ORM: id, email, password_hash, role
+│   │   └── request.py          # SubstitutionRequest ORM: dates, status, etc.
+│   │
+│   ├── auth/
+│   │   ├── __init__.py
+│   │   ├── hashing.py          # bcrypt hash/verify wrappers
+│   │   ├── session.py          # Login state stored per browser session
+│   │   └── guards.py           # require_login, require_admin decorators
+│   │
+│   ├── pages/
+│   │   ├── __init__.py
+│   │   ├── login.py            # / and /login: credential form
+│   │   ├── dashboard.py        # /dashboard: role-aware landing page
+│   │   ├── new_request.py      # /requests/new: teacher submits a request
+│   │   ├── my_requests.py      # /requests/mine: teacher's own history
+│   │   ├── approvals.py        # /approvals: admin queue (approve/reject)
+│   │   └── users.py            # /users: admin user management
+│   │
+│   └── services/
+│       ├── __init__.py
+│       ├── requests_service.py # Business logic: create, approve, reject
+│       └── users_service.py    # Create users, lookup, role changes
 │
-├─ app/
-│  ├─ main.py                        # entrypoint, starts the main module(s)
-|  └─ pizzarp/                       # main module
-│     ├─ __main__.py                 # entrypoint of the module, starts NiceGui
-|     ├─ persistence/                # example of a module; organize in modules according to the architecture
-│     |  ├─ __main.py__              # initializes data access
-│     |  ├─ models.py                # ORM models (User, Pizza, Order, OrderItem)
-│     |  ├─ queries.py               # query helpers (menu, orders)
-|     |  └─ db.py                    # create_engine + session factory + init_db()
-│     ├─ pricing.py                  # subtotal/discount/total logic
-│     ├─ invoice.py                  # generate invoice file
-│     └─ seed.py                     # seed pizzas/users
-│
-├─ data/                          # sqlite database (gitignored)
-├─ invoices/                      # generated invoices (gitignored)
-└─ tests/
-   ├─ test_pricing.py
-   └─ test_invoice.py
+└── tests/
+    ├── __init__.py
+    ├── conftest.py             # Shared fixtures: in-memory DB, test client
+    ├── test_auth.py            # Hashing, login flow, role guards
+    ├── test_requests.py        # Request lifecycle and validation rules
+    └── test_admin.py           # Approval workflow and admin-only access
 ```
+
+---
+
+### Routes and access levels
+
+| Route             | Method   | Access            | Purpose                                  |
+| ----------------- | -------- | ----------------- | ---------------------------------------- |
+| `/`               | GET      | Public            | Redirects to `/login` or `/dashboard`    |
+| `/login`          | GET/POST | Public            | Email + password authentication          |
+| `/logout`         | POST     | Authenticated     | Clears the session and redirects to `/` |
+| `/dashboard`      | GET      | Authenticated     | Landing page; differs by role            |
+| `/requests/new`   | GET/POST | Teacher           | Submit a new substitution request        |
+| `/requests/mine`  | GET      | Teacher           | View own past and pending requests       |
+| `/approvals`      | GET      | Admin             | Queue of pending requests                |
+| `/approvals/{id}` | POST     | Admin             | Approve or reject a specific request     |
+| `/users`          | GET      | Admin             | List all users                           |
+| `/users/new`      | GET/POST | Admin             | Create a new teacher or admin            |
+
+---
+
+### ORM entities
+
+| Entity                 | Field             | Type            | Notes                                |
+| ---------------------- | ----------------- | --------------- | ------------------------------------ |
+| **User**               | id                | int, PK         | Auto-increment                       |
+|                        | email             | str, unique     | Used as the login identifier         |
+|                        | password_hash     | str             | bcrypt output, never plaintext       |
+|                        | role              | enum            | `admin` or `teacher`                 |
+|                        | created_at        | datetime        | Set on insert                        |
+| **SubstitutionRequest**| id                | int, PK         | Auto-increment                       |
+|                        | teacher_id        | int, FK → User  | The teacher submitting               |
+|                        | date              | date            | Day the substitute is needed         |
+|                        | period            | str             | e.g. lesson slot or time range       |
+|                        | subject           | str             | Subject to be covered                |
+|                        | reason            | str             | Free-text justification              |
+|                        | status            | enum            | `pending`, `approved`, `rejected`    |
+|                        | created_at        | datetime        | Set on insert                        |
+|                        | decided_at        | datetime, null  | Set when admin acts on it            |
+|                        | decided_by        | int, FK, null   | The admin who decided                |
+|                        | expires_at        | datetime        | Auto-expiry cutoff                   |
+
+---
+
+### Key design decisions
+
+**Role guards as decorators.** Access control lives in `app/auth/guards.py` as `@require_login` and `@require_admin` decorators applied at the page handler level. This keeps authorization logic out of business code and makes it impossible to register a protected route without explicitly declaring its required role.
+
+**Two-step approval workflow.** Teachers create requests in `pending` state; only an admin can transition them to `approved` or `rejected`. Once decided, a request is immutable — `decided_at` and `decided_by` are stamped, and the status field is locked. This produces a clean audit trail without needing a separate history table.
+
+**Automatic expiry.** Each request carries an `expires_at` timestamp (defaulting to the requested date itself). The approvals page filters out expired pending requests so admins are never shown stale items, and an expired request can no longer be approved even via a crafted URL.
+
+**Duplicate prevention.** When a teacher submits a new request, the service layer checks for an existing non-rejected request from the same teacher for the same `(date, period)` pair. If one exists, submission is refused with a clear error message. This avoids accidental double-bookings without requiring a complex unique constraint that would block legitimate re-submission after a rejection.
 
 ---
 
 ### How to Run
 
-> 🚧 Adjust to your project.
+#### Prerequisites
 
-### 1. Project Setup
-- Python 3.13 (or the course version) is required
-- Create and activate a virtual environment:
-   - **macOS/Linux:**
-      ```bash
-      python3 -m venv .venv
-      source .venv/bin/activate
-      ```
-   - **Windows:**
-      ```bash
-      python -m venv .venv
-      .venv\Scripts\Activate
-      ```
-- Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- **Python 3.10 or newer** (check with `python --version`)
+- `pip` and `venv` (bundled with modern Python distributions)
+- A modern web browser (Chrome, Firefox, Safari, Edge)
 
-### 2. Configuration
-- E.g., setup of parameters or environment variables
+#### Virtual environment setup
 
-### 3. Launch
-- Start the NiceGUI app (example):
-   ```bash
-   python app/main.py
-   ```
-- Open the URL printed in the console.
+**macOS / Linux**
 
-### 4. Usage (document as steps)
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+**Windows (PowerShell)**
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+**Windows (cmd)**
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+#### Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+#### Start the application
+
+```bash
+python main.py
+```
+
+The app will be available at **http://localhost:8080**.
+
+#### Database notes
+
+On the **first startup**, the application will:
+
+1. Automatically create the SQLite database file (`edusub.db`) in the project root.
+2. Run all required migrations to set up the schema (users, substitution requests, etc.).
+3. Seed the database with two default accounts (see [Default Accounts](#-default-accounts)).
+
+No manual database setup or external service (Postgres, MySQL, etc.) is required. To reset the system to a clean state, simply stop the app, delete `edusub.db`, and restart — it will be recreated and re-seeded.
+
+---
+
+### 🔑 Default Accounts
+
+The first time the app starts, two accounts are seeded automatically:
+
+| Role    | Email               | Password     |
+| ------- | ------------------- | ------------ |
+| Admin   | `admin@edusub.ch`   | `admin123`   |
+| Teacher | `teacher@edusub.ch` | `teacher123` |
+
+> **Security note:** These credentials are intended for local development and first-run demos only. Change them immediately in any non-throwaway deployment — log in as the admin, create new accounts, and remove or update the seeded ones.
+
+---
+
+### Usage (document as steps)
 
 > 🚧 Describe the usage of the main functions
 
@@ -515,9 +638,235 @@ Order Pizza:
 
 > 🚧 Explain what you test and how to run tests.
 
-**Types (examples):**
-- Unit tests: pricing/discount rules, validators
-- Integration tests: ORM mappings + queries against a test SQLite DB
+![Test Coverage](docs/test-images/Bild.png)
+
+### How to run
+
+```bash
+# Run all tests
+pytest
+
+# Verbose output, one line per test
+pytest -v
+
+# With coverage report
+pytest --cov=app --cov-report=term-missing
+```
+
+Tests run against an **in-memory SQLite database** seeded fresh for each test, so they never touch `edusub.db` and can be run in any environment without setup.
+
+### Test files
+
+| File                     | Coverage area                                                              |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `tests/test_auth.py`     | Password hashing, login flow, session handling, role-based access guards   |
+| `tests/test_requests.py` | Substitution request creation, validation, duplicate prevention, expiry    |
+| `tests/test_admin.py`    | Admin approval workflow, rejection, audit fields, admin-only route access  |
+
+### Individual test cases
+
+**`tests/test_auth.py`**
+
+- `test_password_hash_is_not_plaintext` — confirms bcrypt is applied and the stored hash never equals the input password.
+- `test_password_verify_accepts_correct_password` — `verify(password, hash)` returns `True` for the original password.
+- `test_password_verify_rejects_wrong_password` — `verify` returns `False` for any other input.
+- `test_login_with_valid_credentials` — submitting correct credentials returns a session and redirects to `/dashboard`.
+- `test_login_with_wrong_password_fails` — wrong password yields an error message and no session.
+- `test_login_with_unknown_email_fails` — unregistered email yields a generic auth error (no user enumeration).
+- `test_require_login_redirects_anonymous` — protected pages send anonymous visitors back to `/login`.
+- `test_require_admin_blocks_teacher` — a teacher hitting `/approvals` receives 403 / forbidden page.
+- `test_require_admin_allows_admin` — an admin hitting `/approvals` is served normally.
+- `test_logout_clears_session` — after logout, the previous session can no longer reach protected pages.
+
+**`tests/test_requests.py`**
+
+- `test_create_request_succeeds_with_valid_input` — teacher creates a well-formed request and it appears in `my_requests` with status `pending`.
+- `test_create_request_rejects_past_date` — submitting a date in the past raises a validation error.
+- `test_create_request_requires_subject` — empty subject field is rejected.
+- `test_create_request_requires_reason` — empty reason field is rejected.
+- `test_duplicate_request_same_date_period_blocked` — second submission for the same `(date, period)` is refused while the first is still pending or approved.
+- `test_duplicate_allowed_after_rejection` — after the first request is rejected, the teacher can submit a fresh one for the same slot.
+- `test_my_requests_only_shows_own` — teacher A cannot see teacher B's requests on `/requests/mine`.
+- `test_expired_request_not_shown_in_approvals` — a pending request whose `expires_at` has passed is hidden from the admin queue.
+
+**`tests/test_admin.py`**
+
+- `test_admin_sees_pending_requests` — `/approvals` lists all non-expired pending requests across all teachers.
+- `test_approve_request_sets_status_and_audit` — approving stamps `status=approved`, `decided_at`, and `decided_by`.
+- `test_reject_request_sets_status_and_audit` — rejecting stamps `status=rejected`, `decided_at`, and `decided_by`.
+- `test_cannot_approve_already_decided_request` — a second decision on the same request is refused.
+- `test_cannot_approve_expired_request` — attempting to approve a request past its `expires_at` is refused even via a direct URL.
+- `test_teacher_cannot_access_approvals_route` — a logged-in teacher hitting `/approvals` receives forbidden.
+- `test_admin_can_create_new_user` — admin creates a teacher account via `/users/new` and the new user can log in.
+- `test_create_user_rejects_duplicate_email` — creating a second user with an existing email is refused.
+
+---
+
+## Test Cases
+
+### TC_001 – Unit Test: Password Hashing and Verification
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_001 |
+| Test case title/description | Verify that a password is hashed and can be verified correctly |
+| Preconditions | Auth module is available |
+| Test steps | 1. Enter a plain password<br>2. Hash the password<br>3. Verify the plain password against the hash |
+| Test data/input | Password: `Password@123` |
+| Expected result | Password hash is created and verification returns True |
+| Actual result | Password hash is created and verification returns True |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_002 – Unit Test: Create Substitute Request
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_002 |
+| Test case title/description | Verify that a school manager can create a substitute request |
+| Preconditions | Admin user exists |
+| Test steps | 1. Create request with subject, grade, date and note<br>2. Save request<br>3. Check request status |
+| Test data/input | Subject: `Mathematics`<br>Grade: `3a`<br>Date: `2026-05-20` |
+| Expected result | Request is created and status is set to `open` |
+| Actual result | Request is created and status is set to `open` |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_003 – Unit Test: View Open Requests
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_003 |
+| Test case title/description | Verify that only open requests are returned |
+| Preconditions | At least one open and one filled request exist |
+| Test steps | 1. Create open request<br>2. Mark another request as filled<br>3. Call get_open_requests() |
+| Test data/input | Request status: `open`, `filled` |
+| Expected result | Only requests with status `open` are displayed |
+| Actual result | Only requests with status `open` are displayed |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_004 – Unit Test: Prevent Duplicate Application
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_004 |
+| Test case title/description | Verify that a teacher cannot apply twice for the same request |
+| Preconditions | Teacher and open request exist |
+| Test steps | 1. Teacher applies for request<br>2. Teacher applies again for the same request |
+| Test data/input | Teacher ID: `2`<br>Request ID: `1` |
+| Expected result | First application succeeds, second application is rejected |
+| Actual result | First application succeeds, second application is rejected |
+| Status | Pass |
+| Comments | Prevents duplicate applications |
+
+---
+
+### TC_005 – Unit Test: Mark Request as Filled
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_005 |
+| Test case title/description | Verify that a request can be marked as filled |
+| Preconditions | Open request exists |
+| Test steps | 1. Select open request<br>2. Mark request as filled<br>3. Check updated status |
+| Test data/input | Request ID: `1` |
+| Expected result | Request status changes from `open` to `filled` |
+| Actual result | Request status changes from `open` to `filled` |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_006 – DB Test: Save User
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_006 |
+| Test case title/description | Verify that a user is saved correctly in the database |
+| Preconditions | Database connection is available |
+| Test steps | 1. Create user object<br>2. Save user to database<br>3. Query user by email |
+| Test data/input | Name: `Test Teacher`<br>Email: `teacher@test.com`<br>Role: `teacher` |
+| Expected result | User is stored and can be retrieved from the database |
+| Actual result | User is stored and can be retrieved from the database |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_007 – DB Test: Save Substitute Request
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_007 |
+| Test case title/description | Verify that a substitute request is persisted with all relevant fields |
+| Preconditions | Admin user exists in database |
+| Test steps | 1. Create substitute request<br>2. Save request to database<br>3. Query request from database |
+| Test data/input | Subject: `German`<br>Grade: `4b`<br>Date: `2026-06-01` |
+| Expected result | Request is saved with correct subject, grade, date and status |
+| Actual result | Request is saved with correct subject, grade, date and status |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_008 – DB Test: Save Application
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_008 |
+| Test case title/description | Verify that a teacher application is stored in the database |
+| Preconditions | Teacher and open request exist |
+| Test steps | 1. Teacher applies for request<br>2. Save application<br>3. Query application by teacher and request |
+| Test data/input | Teacher ID: `2`<br>Request ID: `1` |
+| Expected result | Application is saved with status `pending` |
+| Actual result | Application is saved with status `pending` |
+| Status | Pass |
+| Comments | No issues found |
+
+---
+
+### TC_009 – Integration Test: Full Substitute Workflow
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_009 |
+| Test case title/description | Verify the full workflow from request creation to approval |
+| Preconditions | Admin and teacher accounts exist |
+| Test steps | 1. Admin creates substitute request<br>2. Teacher views open request<br>3. Teacher applies<br>4. Admin approves application<br>5. System updates statuses |
+| Test data/input | Subject: `French`<br>Grade: `4a`<br>Teacher: `Jane Teacher` |
+| Expected result | Application status becomes `approved` and request status becomes `filled` |
+| Actual result | Application status becomes `approved` and request status becomes `filled` |
+| Status | Pass |
+| Comments | End-to-end workflow works correctly |
+
+---
+
+### TC_010 – Integration Test: Secure Assignment / Double Booking Prevention
+
+| Field | Details |
+|---|---|
+| Test case ID | TC_010 |
+| Test case title/description | Verify that double booking or duplicate assignment is prevented |
+| Preconditions | Teacher and open request exist |
+| Test steps | 1. Teacher applies for request<br>2. Same teacher tries to apply again<br>3. System checks existing application |
+| Test data/input | Teacher ID: `2`<br>Request ID: `1` |
+| Expected result | First application succeeds, second application is blocked with an error message |
+| Actual result | First application succeeds, second application is blocked with an error message |
+| Status | Pass |
+| Comments | Scheduling conflicts are prevented |
+
+
+**Types:**
+- **Unit tests:** password hashing, request creation, request status changes, duplicate application prevention, grade/request filtering
+- **Database tests:** ORM mappings, saving and retrieving users, substitute requests, applications, and subjects in a test SQLite database
+- **Integration tests:** full substitute workflow from request creation to teacher application and admin approval, including status updates and duplicate application handling
 
 **Run:**
 ```bash
@@ -533,7 +882,8 @@ pytest
 - nicegui
 - sqlalchemy / sqlmodel
 - pydantic
-- ...
+- bycrypt
+- pytest
 
 ## 👥 Team & Contributions
 
@@ -543,9 +893,9 @@ pytest
 
 | Name      | Contribution |
 |-----------|--------------|
-| Ata Erduran | Teacher Dashboard, Application model, ApplicationService (apply, list, validation) |
-| Ahmet Iyidogan | Authentication, User model, Login/Register views, database setup, route guard, and main application routing |
-| Mert Kirtas | Admin Dashboard, SubstituteRequest model, RequestService (create, list, approve, reject), and request management logic |
+| Ata Erduran | application.py, application_service, teacher_dashboard.py, profile_service.py, profile.py, main.py, test_e2e.py, README.md |
+| Ahmet Iyidogan | database.py, user.py, auth.py, login.py, subject.py, request.py, register.py, main.py, README.md |
+| Mert Kirtas | request.py, request_service.py, admin_dashboard.py, main.py, test_request_service.py |
 
 ---
 
@@ -569,4 +919,3 @@ pytest
 This project is provided for **educational use only** as part of the Advanced Programming module.
 
 [MIT License](LICENSE)
-

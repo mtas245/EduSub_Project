@@ -42,6 +42,6 @@ pytest tests/ -v
 ## Team
    Member A Auth, Login, Register, User model, database
    Member B Admin Dashboard, RequestService, auto-deletion
-   Member C Teacher Dashboard, Profile, E2E test, README
+   Member C Teacher Dashboard, Profile, E2E test, README2
 
 
