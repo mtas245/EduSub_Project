@@ -99,6 +99,7 @@ if __name__ in {'__main__', '__mp_main__'}:
     ui.run(
         title='EduSub',
         storage_secret='EduSub-secret-key-change-in-prod',
-        port=8080,
-        reload=False
+        port=int(os.getenv('PORT', 8080)),
+        host='0.0.0.0',
+        reload=True
     )
