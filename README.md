@@ -236,8 +236,7 @@ When a substitute teacher tries to accept a request, the system checks whether t
 > 🚧 Name actors and briefly describe each use case. Ideally, a UML use case diagram specifies use cases and relationships.
 
 ![UML Use Case Diagram](docs/architecture-diagrams/uml_use_case_diagram.png)
-
-<img width="480" height="813" alt="Bildschirmfoto 2026-03-23 um 13 17 25" src="https://github.com/user-attachments/assets/fcddd356-3ff6-4493-b692-5ee5b583e53c" />   
+  
 
 
 **Actors**
@@ -257,7 +256,7 @@ Manages users, roles, schools, and monitors system activity.
    Users log into the system using email and password.  
    → System authenticates user and redirects to the correct dashboard.
 
-2. **Register Account (Visitor)**  
+2. **Register Account (All Users)**  
    A new user creates an account by entering personal details and selecting a role.  
    → Account is stored in the system.
 
