@@ -39,7 +39,7 @@ In schools, when a teacher becomes ill or unavailable, the school management mus
 
 When a teacher is absent:
 
-1. The school manager logs into the system.
+1. The school manager (admin) logs into the system.
 2. The school manager creates a substitute request including subject and date.
 3. The request is stored in the system and marked as "open".
 4. Substitute teachers log into the system and view all open requests.
