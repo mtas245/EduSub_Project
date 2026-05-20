@@ -9,11 +9,6 @@ from datetime import datetime
 SCHOOL_NAME = "Primarschule St, Johann"
 SCHOOL_ADDRESS = "Elsässerstrasse 7, 4056 Basel"
 
-def get_subject_name(db, subject_id):
-    """Retrieve subject name by ID from database."""
-    subject = db.get(Subject, subject_id)
-    return subject.name if subject else "Unknown"
-
 def teacher_dashboard_view():
     db = SessionLocal()
     req_service = RequestService(db)
@@ -95,9 +90,109 @@ def teacher_dashboard_view():
                                 accent = 'bg-gray-300' if already_applied else ('bg-green-500' if is_kg else 'bg-blue-600')
                                 grade_bage = 'bg-green-50 text-green-700' if is_kg else 'bg-blue-50 text-blue-700'
 
+                                with ui.card().classes('w-full rounded-xl border border-gray-100 shadow-none'):
+                                    with ui.row().classes('w-full items-stretch'):
+                                        ui.element('div').classes(f'w-1 rounded-l-xl {accent}')
+                                        with ui.column().classes('flex-1 p-4 gap-2'):
+                                            # top row title + grade badge
+                                            with ui.row().classes('w-full justify-between items-center'):
+                                                ui.label(subject_name).classes('text-base font-semibold text-gray-800')
+                                                ui.label(req.grade_level).classes(f'text-xs font-semibold px-3 py-1 rounded-full {grade_bage}')
 
-                                    
-                    
+                                            # meta row
+                                            with ui.row().classes('gap-4 text-sm text-gray-500 flex-wrap'):
+                                                with ui.row().classes('items-center gap-1'):
+                                                    ui.icon('calender_today').classes('text-sm text-blue-400')
+                                                    ui.label(req.date.strftime('%d.%m.%Y'))
+                                                if req.time_slot:
+                                                    with ui.row().classes('items-center gap-1'):
+                                                        ui.icon('schedule').classes('text-sm text-blue-400')
+                                                        ui.label(req.time_slot)
+                                                if req.expires_at:
+                                                    hours = int((req.expires_at - datetime.now()).total_seconds() // 3600)
+                                                    exp_col = 'text-red-500' if hours < 6 else 'text-gray-400'
+                                                    with ui.row().classes(f'items-center gap-1 {exp_col}'):
+                                                        ui.icon('hourglass_empty').classes('text-sm')
+                                                        ui.label(f'Expires in {hours}h')
+
+                                            # Footer row location + action
+                                            with ui.row().classes('w-full justify-between items-center mt-1'):
+                                                with ui.row().classes('items-center gap-1 text-xs text-gray-400'):
+                                                    ui.icon('location_on').classes('text-sm')
+                                                    ui.label(f'{SCHOOL_NAME} · {SCHOOL_ADDRESS}')
+
+                                                def make_apply(rid=req.id):
+                                                    def apply():
+                                                        result = app_service.apply(
+                                                            teacher_id=teacher_id,
+                                                            request_id=rid,
+                                                        )
+                                                        ui.notify(
+                                                            result['message'],
+                                                            color='positive' if result['success'] else 'negative'
+                                                        )
+                                                        render_open()
+                                                    return apply
+                                                
+                                                if already_applied:
+                                                    with ui.row().classes('items-center gap-1 text-sm text-green-600 font-medium'):
+                                                        ui.icon('check_circle').classes('text-base')
+                                                        ui.label('Applied')
+                                                else:
+                                                    ui.button('Apply', icon='send',
+                                                              on_click=make_apply()).classes('bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700')
+                                                    
+                                            grade_filter.on('update:model-value', lambda: render_open())
+                                            render_open()
+
+                                            # Tab 2: My Assignments
+                                            with ui.tab_panel(tab_mine).classes('px-0'):
+
+                                                my_assignments = req_service.get_approved_assignments_for_teacher(teacher_id)
+
+                                                if not my_assignments:
+                                                    with ui.column().classes('w-full items-center py-20 gap-3'):
+                                                        with ui.element('div').classes('w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center'):
+                                                            ui.icon('assignment_turned_in').classes('text-3xl text-gray-400')
+                                                        ui.label('No confirmed assignments yet').classes('text-base font-medium text-gray-600')
+                                                        ui.label('Once an admin approves your application, your assignments will appear here.').classes('text-sm text-gray-400 text-center max-w-xs')
+                                                else:
+                                                    with ui.row().classes('items-center gap-2 py-4'):
+                                                        ui.icon('check_circle').classes('text-green-500 text-lg')
+                                                        ui.label(f'{len(my_assignments)} confirmed assignment{"s" if len(my_assignments) != 1 else ""}').classes('text-sm font-medium text-gray-600')
+
+                                                    with ui.column().classes('w-full gap-3'):
+                                                        for req in my_assignments:
+                                                            subject_name = get_subject_name(db, req.subject_id)
+                                                            is_kg = req.grade_level in ['KG1', 'KG2']
+                                                            grade_bage = 'bg-green-50 text-green-700' if is_kg else 'bg-blue-50 text-blue-700'
+
+                                                            with ui.card().classes('w-full rounded-xl border border-gray-100 shadow-none'):
+                                                                with ui.row().classes('w-full items-stretch'):
+                                                                    ui.element('div').classes('w-1 rounded-l-xl bg-green-500')
+                                                                    with ui.column().classes('flex-1 p-4 gap-2'):
+                                                                        with ui.row().classes('w-full justify-between items-center'):
+                                                                            ui.label(subject_name).classes('text-base font-semibold text-gray-800')
+                                                                            with ui.row().classes('items-center gap-2'):
+                                                                                ui.label(req.grade_level).classes(f'text-xs font-semibold px-3 py-1 rounded-full {grade_bage}')
+                                                                                ui.badge('Confirmed', color='green').classes('text-white text-xs')
+                                                                        with ui.row().classes('gap-4 text-sm text-gray-500 flex-wrap'):
+                                                                            with ui.row().classes('items-center gap-1'):
+                                                                                ui.icon('calender_today').classes('text-sm text-green-400')
+                                                                                ui.label(req.date.strftime('%d.%m.%Y'))
+                                                                            if req.time_slot:
+                                                                                with ui.row().classes('items-center gap-1'):
+                                                                                    ui.icon('schedule').classes('text-sm text-green-400')
+                                                                                    ui.label(req.time_slot)
+                                                                            with ui.row().classes('items-center gap-1'):
+                                                                                ui.icon('location_on').classes('text-sm text-green-400')
+                                                                                ui.label(f'{SCHOOL_NAME} · {SCHOOL_ADDRESS}').classes('text-xs text-gray-400')
+
+                                                                        if req.note:
+                                                                            with ui.row().classes('items-center gap-1 text-xs text-gray-400'):
+                                                                                ui.icon('notes').classes('text-sm')
+                                                                                ui.label(req.note)
+
 
                       
             
