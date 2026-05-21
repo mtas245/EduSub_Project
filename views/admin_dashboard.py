@@ -66,15 +66,15 @@ def admin_dashboard():
     admin_id = app.storage.user.get('user_id')
 
     # --- Header ---
-    with ui.row().classes('w-full items-center justify-between px-8 py-4 bg-blue-800 text-white shadow-md'):
+    with ui.row().classes('w-full items-center justify-between px-8 py-4 bg-blue-900 text-white shadow-md'):
         with ui.row().classes('items-center gap-3'):
-            ui.icon('school').classes('text-2xl text-blue-200')
-            ui.label('EduSub').classes('text-xl font-bold tracking-wide text-white')
+            ui.icon('school').classes('text-2xl text-blue 300')
+            ui.label('EduSub').classes('text-xl font-bold text-white')
             ui.label('| Admin').classes('text-blue-300 text-sm')
             ui.label(f'– {full_name}').classes('text-blue-300 text-sm')
         ui.button('Logout', icon='logout',
                   on_click=lambda: ui.navigate.to('/logout')).classes(
-            'bg-transparent text-white border border-blue-500 rounded-lg px-4 py-2 text-sm hover:bg-blue-700')
+            'bg-transparent text-white border border-blue-500 rounded-lg px-4 py-2 text-sm')
 
     with ui.column().classes('w-full max-w-5xl mx-auto p-6 gap-6'):
 
@@ -85,47 +85,38 @@ def admin_dashboard():
 
         # --- Stats ---
         with ui.row().classes('w-full gap-4'):
-            with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                ui.icon('list_alt').classes('text-blue-400 text-2xl')
-                ui.label(str(len(all_requests))).classes('text-4xl font-bold text-blue-700')
-                ui.label('Total Requests').classes('text-gray-400 text-sm mt-1')
-            with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                ui.icon('event_available').classes('text-green-400 text-2xl')
-                ui.label(str(len(open_requests))).classes('text-4xl font-bold text-green-600')
-                ui.label('Open Requests').classes('text-gray-400 text-sm mt-1')
-            with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                ui.icon('pending_actions').classes('text-yellow-400 text-2xl')
-                ui.label(str(len(pending_apps))).classes('text-4xl font-bold text-yellow-600')
-                ui.label('Pending Applications').classes('text-gray-400 text-sm mt-1')
-            with ui.card().classes('flex-1 p-5 rounded-xl shadow-sm border border-gray-100 text-center'):
-                ui.icon('person_add').classes('text-blue-400 text-2xl')
-                ui.label(str(len(pending_teachers))).classes('text-4xl font-bold text-blue-600')
-                ui.label('Pending Teachers').classes('text-gray-400 text-sm mt-1')
+            stats = [
+                ('list_alt', str(len(all_requests)), 'Total Requests', 'text-blue-700', 'text-blue-400'),
+                ('event_available', str(len(open_requests)), 'Open Requests', 'text-green-600', 'text-green-400'),
+                ('pending_actions', str(len(pending_apps)), 'Pending Applications', 'text-yellow-600', 'text-yellow-400'),
+                ('person_add', str(len(pending_teachers)), 'Pending Teachers', 'text-blue-600', 'text-blue-400'),
+            ]
+            for icon, num, lbl, num_cls, icon_cls in stats:
+                with ui.card().classes('flex-1 rounded-xl border border-gray-100 p-5 text-center'):
+                    ui.icon(icon).classes(f'{icon_cls} text-2xl mb-1')
+                    ui.label(num).classes(f'text-4xl font-bold {num_cls}')
+                    ui.label(lbl).classes('text-gray-400 text-xs mt-1')
 
-        # --- Create Request ---
-        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+        # Creating request
+        with ui.card().classes('w-full rounded-xl border border-gray-100 p-6'):
             with ui.row().classes('items-center gap-2 mb-4'):
                 ui.icon('add_circle').classes('text-blue-500 text-xl')
-                ui.label('Create New Substitute Request').classes('text-lg font-semibold')
+                ui.label('Create New Substiute Request').classes('text-base font-semibold')
 
             with ui.row().classes('gap-3 flex-wrap'):
                 grade_select = ui.select(
-                    options=GRADE_LEVELS,
-                    label='Class / Grade',
-                    value='1a'
-                ).classes('flex-1')
-
+                    options=GRADE_LEVELS, label='Class / Grade', value='1a'
+                ).classes('flex-1').props('outlined dense')
                 initial_subjects = get_subjects_for_grade('1a')
                 subject_select = ui.select(
-                    options=initial_subjects,
-                    label='Subject',
-                    value=initial_subjects[0]
-                ).classes('flex-1')
-
+                    options=initial_subjects, label='Subject', value=initial_subjects[0]
+                ).classes('flex-1').props('outlined dense')
                 date_input = ui.date(value=str(date.today())).classes('flex-1')
-                time_input = ui.input(label='Time Slot (e.g. 08:00-12:00)').classes('flex-1')
-                note_input = ui.textarea(label='Additional Notes').classes('flex-1')
-
+                time_input = ui.input(label='Time Slot (e.g. 08:00-12:00)').classes(
+                    'flex-1').props('outlined dense')
+                note_input = ui.textarea(label='Additional Notes').classes(
+                    'flex-1').props('outlined rows=2')
+                
             def on_grade_change(e):
                 new_grade = e.args if isinstance(e.args, str) else grade_select.value
                 new_subjects = get_subjects_for_grade(new_grade)
@@ -139,53 +130,41 @@ def admin_dashboard():
                 grade = grade_select.value
                 subject_name = subject_select.value
                 dt = date_input.value
-
                 if not subject_name or not dt:
                     ui.notify('Please fill in all required fields.', color='negative')
                     return
-
                 date_obj = datetime.strptime(dt, '%Y-%m-%d').date()
-
                 if date_obj < date.today():
                     ui.notify('The date cannot be in the past.', color='negative')
                     return
-
                 time_slot = time_input.value.strip() or None
-                if time_slot:
-                    if not re.match(r'^\d{2}:\d{2}-\d{2}:\d{2}$', time_slot):
-                        ui.notify('Time slot must be in format HH:MM-HH:MM (e.g. 08:00-12:00).', color='negative')
-                        return
-
+                if time_slot and not re.match(r'^\d{2}:\d{2}-\d{2}:\d{2}$', time_slot):
+                    ui.notify('Time slot format: HH:MM-HH:MM', color='negative')
+                    return
                 subject_id = get_subject_id(db, subject_name)
                 if subject_id is None:
-                    ui.notify('Subject not found in database.', color='negative')
+                    ui.notify('Subject not found.', color='negative')
                     return
-
                 req = svc.create_request(
-                    subject_id=subject_id,
-                    grade_level=grade,
-                    date_obj=date_obj,
-                    time_slot=time_slot,
-                    note=note_input.value,
-                    admin_id=admin_id,
+                    subject_id=subject_id, grade_level=grade,
+                    date_obj=date_obj, time_slot=time_slot,
+                    note=note_input.value, admin_id=admin_id
                 )
-                subject_display = get_subject_name(db, req.subject_id)
                 ui.notify(
-                    f'Request created: {subject_display} – {req.grade_level} on {req.date}',
-                    color='positive'
-                )
+                    f'Request created: {get_subject_name(db, req.subject_id)} - {req.grade_level}',
+                    color='positive')
                 ui.navigate.to('/admin')
 
-            ui.button('Create Request', icon='send',
-                      on_click=create_request).classes(
+            ui.button('Create Request', icon='send', on_click=create_request).classes(
                 'bg-blue-700 text-white rounded-lg px-5 py-2 mt-3 hover:bg-blue-800')
-
-        # --- All Requests Table ---
-        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
-            with ui.row().classes('items-center gap-2 mb-4'):
-                ui.icon('table_view').classes('text-blue-500 text-xl')
-                ui.label('All Substitute Requests').classes('text-lg font-semibold')
-            ui.label('Click on a row to see details.').classes('text-xs text-gray-400 mb-2')
+            
+        # Requests table
+        with ui.card().classes('w-full rounded-xl border border-gray-100 p-6'):
+            with ui.row().classes('items-center justify-between mb-3'):
+                with ui.row().classes('items-center gap-2'):
+                    ui.icon('table_view').classes('text-blue-500 text-xl')
+                    ui.label('All Substitute Requests').classes('text-base font-semibold')
+                ui.label('Click a row for details').classes('text-xs text-gray-400')
 
             columns = [
                 {'name': 'grade',     'label': 'Class',     'field': 'grade',     'align': 'left'},
@@ -194,20 +173,17 @@ def admin_dashboard():
                 {'name': 'time_slot', 'label': 'Time Slot', 'field': 'time_slot', 'align': 'left'},
                 {'name': 'status',    'label': 'Status',    'field': 'status',    'align': 'left'},
             ]
-            rows = [
-                {
-                    'id':         r.id,
-                    'grade':      r.grade_level,
-                    'subject':    get_subject_name(db, r.subject_id),
-                    'date':       r.date.strftime('%d.%m.%Y') if r.date else '-',
-                    'time_slot':  r.time_slot if r.time_slot else '-',
-                    'status':     r.status.value,
-                    'note':       r.note or '-',
-                    'created_at': r.created_at.strftime('%d.%m.%Y %H:%M') if r.created_at else '-',
-                    'expires_at': r.expires_at.strftime('%d.%m.%Y %H:%M') if r.expires_at else '-',
-                }
-                for r in all_requests
-            ]
+            rows = [{
+                'id':         r.id,
+                'grade':      r.grade_level,
+                'subject':    get_subject_name(db, r.subject_id),
+                'date':       r.date.strftime('%d.%m.%Y') if r.date else '-',
+                'time_slot':  r.time_slot or '-',
+                'status':     r.status.value,
+                'note':       r.note or '-',
+                'created_at': r.created_at.strftime('%d.%m.%Y %H:%M') if r.created_at else '-',
+                'expires_at': r.expires_at.strftime('%d.%m.%Y %H:%M') if r.expires_at else '-',
+            } for r in all_requests]
 
             with ui.dialog() as detail_dialog, ui.card().classes('p-6 min-w-96 rounded-xl'):
                 ui.label('Request Details').classes('text-lg font-semibold mb-4')
@@ -224,109 +200,113 @@ def admin_dashboard():
 
             def on_row_click(e):
                 row = e.args[1]
-                detail_grade.set_text(f'Class:      {row["grade"]}')
-                detail_subject.set_text(f'Subject:    {row["subject"]}')
-                detail_date.set_text(f'Date:       {row["date"]}')
-                detail_time.set_text(f'Time Slot:  {row["time_slot"]}')
-                detail_status.set_text(f'Status:     {row["status"]}')
-                detail_note.set_text(f'Note:       {row["note"]}')
-                detail_created.set_text(f'Created:    {row["created_at"]}')
-                detail_expires.set_text(f'Expires:    {row["expires_at"]}')
+                detail_grade.set_text(f'Class:     {row["grade"]}')
+                detail_subject.set_text(f'Subject:   {row["subject"]}')
+                detail_date.set_text(f'Date:      {row["date"]}')
+                detail_time.set_text(f'Time Slot: {row["time_slot"]}')
+                detail_status.set_text(f'Status:    {row["status"]}')
+                detail_note.set_text(f'Note:      {row["note"]}')
+                detail_created.set_text(f'Created:   {row["created_at"]}')
+                detail_expires.set_text(f'Expires:   {row["expires_at"]}')
                 detail_dialog.open()
 
             table = ui.table(columns=columns, rows=rows).classes('w-full cursor-pointer')
             table.on('rowClick', on_row_click)
 
-        # --- Pending Applications ---
-        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+        def action_card(item, is_teacher=False):
+            if is_teacher:
+                teacher = item
+                accent = 'bg-blue-400'
+            else:
+                teacher = db.exec(select(User).where(User.id == item.teacher_id)).first()
+                accent = 'bg-yellow-400'
+
+            with ui.card().classes('w-full rounded-xl border border-gray-100 mb-3'):
+                with ui.row().classes('w-full items-stretch'):
+                    ui.element('div').classes(f'w-1 rounded-l-xl {accent}')
+                    with ui.row().classes('flex-1 p-4 justify-between items-center'):
+                        with ui.column().classes('gap-1'):
+                            pnr = teacher.personal_number if teacher else '-'
+                            name = teacher.full_name if teacher else '-'
+                            tid = teacher.id if teacher else (
+                                item.teacher_id if not is_teacher else item.id)
+                            with ui.row().classes('items-center gap-2'):
+                                ui.icon('person').classes('text-base text-blue-400')
+                                ui.link(f'{pnr} ({name})',
+                                        f'/admin/teacher/{tid}').classes(
+                                    'font-mono font-semibold text-blue-700 hover:underline text-sm')
+                            with ui.row().classes('items-center gap-3 text-xs text-gray-400'):
+                                if not is_teacher:
+                                    ui.label(f'Request #{item.request_id}')
+                                    if item.applied_at:
+                                        ui.label(item.applied_at.strftime('%d.%m.%Y %H:%M'))
+                                else:
+                                    ui.label(teacher.email if teacher else '')
+                                    if teacher and teacher.documents_path:
+                                        doc_count = len(teacher.documents_path.split(','))
+                                        ui.label(f'{doc_count} document(s)')
+                        with ui.row().classes('gap-2'):
+                            if is_teacher:
+                                t_id = item.id
+                                ui.button('Approve', icon='check',
+                                          on_click=lambda _, tid=t_id: [
+                                              profile_svc.approve_teacher(tid),
+                                              ui.navigate.to('/admin')
+                                          ]).classes(
+                                    'bg-green-600 text-white rounded-lg px-3 text-sm hover:bg-green-700')
+                                ui.button('Reject', icon='close',
+                                          on_click=lambda _, tid=t_id: [
+                                              profile_svc.reject_teacher(tid),
+                                              ui.navigate.to('/admin')
+                                          ]).classes(
+                                    'bg-red-500 text-white rounded-lg px-3 text-sm hover:bg-red-600')
+                            else:
+                                a_id = item.id
+                                ui.button('Approve', icon='check',
+                                          on_click=lambda _, aid=a_id: [
+                                              svc.approve_application(aid),
+                                              ui.navigate.to('/admin')
+                                          ]).classes(
+                                    'bg-green-600 text-white rounded-lg px-3 text-sm hover:bg-green-700')
+                                ui.button('Reject', icon='close',
+                                          on_click=lambda _, aid=a_id: [
+                                              svc.reject_application(aid),
+                                              ui.navigate.to('/admin')
+                                          ]).classes(
+                                    'bg-red-500 text-white rounded-lg px-3 text-sm hover:bg-red-600')
+
+        # Pending Applications
+        with ui.card().classes('w-full rounded-xl border border-gray-100 p-6'):
             with ui.row().classes('items-center gap-2 mb-4'):
                 ui.icon('pending_actions').classes('text-yellow-500 text-xl')
-                ui.label('Pending Applications').classes('text-lg font-semibold')
-
+                ui.label('Pending Applications').classes('text-base font-semibold')
+                ui.label(str(len(pending_apps))).classes(
+                    'ml-auto text-sm bg-yellow-50 text-yellow-700 font-semibold px-3 py-1 rounded-full')
             if not pending_apps:
-                with ui.column().classes('w-full items-center py-8 text-gray-400'):
-                    ui.icon('check_circle').classes('text-4xl mb-2 text-green-400')
-                    ui.label('No pending applications at the moment.').classes('text-sm')
+                with ui.column().classes('w-full items-center py-8 gap-2 text-gray-400'):
+                    ui.icon('check_circle').classes('text-4xl text-green-400')
+                    ui.label('No pending applications').classes('text-sm')
             else:
                 for appl in pending_apps:
-                    teacher = db.exec(select(User).where(User.id == appl.teacher_id)).first()
-                    teacher_name = teacher.full_name if teacher else f'Teacher #{appl.teacher_id}'
-                    teacher_pnr = teacher.personal_number if teacher else '-'
+                    action_card(appl, is_teacher=False)
 
-                    with ui.card().classes('w-full rounded-xl border border-gray-100 mb-3'):
-                        with ui.row().classes('w-full items-stretch'):
-                            ui.element('div').classes('w-1 rounded-l-xl bg-yellow-400')
-                            with ui.row().classes('flex-1 p-4 justify-between items-center'):
-                                with ui.column().classes('gap-1'):
-                                    with ui.row().classes('items-center gap-2'):
-                                        ui.icon('person').classes('text-base text-blue-400')
-                                        ui.link(
-                                            f'{teacher_pnr} ({teacher_name})',
-                                            f'/admin/teacher/{appl.teacher_id}'
-                                        ).classes('font-mono font-bold text-blue-700 hover:underline')
-                                    with ui.row().classes('items-center gap-2 text-sm text-gray-400'):
-                                        ui.icon('tag').classes('text-base')
-                                        ui.label(f'Request ID: {appl.request_id}')
-                                        ui.icon('schedule').classes('text-base ml-2')
-                                        ui.label(
-                                            appl.applied_at.strftime('%d.%m.%Y %H:%M') if appl.applied_at else '-'
-                                        )
-                                with ui.row().classes('gap-2'):
-                                    app_id = appl.id
-                                    ui.button('Approve', icon='check',
-                                              on_click=lambda _, a=app_id: [
-                                                  svc.approve_application(a),
-                                                  ui.navigate.to('/admin')
-                                              ]).classes('bg-green-600 text-white rounded-lg px-4 hover:bg-green-700')
-                                    ui.button('Reject', icon='close',
-                                              on_click=lambda _, a=app_id: [
-                                                  svc.reject_application(a),
-                                                  ui.navigate.to('/admin')
-                                              ]).classes('bg-red-500 text-white rounded-lg px-4 hover:bg-red-600')
-
-        # --- Pending Teacher Approvals ---
-        with ui.card().classes('w-full p-6 rounded-xl shadow-sm border border-gray-100'):
+        # Pending Teacher Approvals
+        with ui.card().classes('w-full rounded-xl border border-gray-100 p-6'):
             with ui.row().classes('items-center gap-2 mb-4'):
                 ui.icon('person_add').classes('text-blue-500 text-xl')
-                ui.label('Pending Teacher Approvals').classes('text-lg font-semibold')
-
+                ui.label('Pending Teacher Approvals').classes('text-base font-semibold')
+                ui.label(str(len(pending_teachers))).classes(
+                    'ml-auto text-sm bg-blue-50 text-blue-700 font-semibold px-3 py-1 rounded-full')
             if not pending_teachers:
-                with ui.column().classes('w-full items-center py-8 text-gray-400'):
-                    ui.icon('check_circle').classes('text-4xl mb-2 text-green-400')
-                    ui.label('No pending teacher approvals.').classes('text-sm')
+                with ui.column().classes('w-full items-center py-8 gap-2 text-gray-400'):
+                    ui.icon('check_circle').classes('text-4xl text-green-400')
+                    ui.label('No pending teacher approvals').classes('text-sm')
             else:
                 for teacher in pending_teachers:
-                    with ui.card().classes('w-full rounded-xl border border-gray-100 mb-3'):
-                        with ui.row().classes('w-full items-stretch'):
-                            ui.element('div').classes('w-1 rounded-l-xl bg-blue-400')
-                            with ui.row().classes('flex-1 p-4 justify-between items-center'):
-                                with ui.column().classes('gap-1'):
-                                    with ui.row().classes('items-center gap-2'):
-                                        ui.icon('person').classes('text-base text-blue-400')
-                                        ui.link(
-                                            f'{teacher.personal_number} ({teacher.full_name})',
-                                            f'/admin/teacher/{teacher.id}'
-                                        ).classes('font-mono font-bold text-blue-700 hover:underline')
-                                    with ui.row().classes('items-center gap-2 text-sm text-gray-400'):
-                                        ui.icon('email').classes('text-base')
-                                        ui.label(teacher.email)
-                                        if teacher.phone:
-                                            ui.icon('phone').classes('text-base ml-2')
-                                            ui.label(teacher.phone)
-                                        if teacher.documents_path:
-                                            ui.icon('attach_file').classes('text-base ml-2')
-                                            ui.label(f'{len(teacher.documents_path.split(","))} document(s)')
-                                with ui.row().classes('gap-2'):
-                                    t_id = teacher.id
-                                    ui.button('Approve', icon='check',
-                                              on_click=lambda _, tid=t_id: [
-                                                  profile_svc.approve_teacher(tid),
-                                                  ui.navigate.to('/admin')
-                                              ]).classes('bg-green-600 text-white rounded-lg px-4 hover:bg-green-700')
-                                    ui.button('Reject', icon='close',
-                                              on_click=lambda _, tid=t_id: [
-                                                  profile_svc.reject_teacher(tid),
-                                                  ui.navigate.to('/admin')
-                                              ]).classes('bg-red-500 text-white rounded-lg px-4 hover:bg-red-600')
+                    action_card(teacher, is_teacher=True)
 
-        db.close()
+    db.close()
+
+
+                
+                                    
