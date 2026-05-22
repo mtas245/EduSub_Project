@@ -614,7 +614,7 @@ The first time the app starts, two accounts are seeded automatically:
 | Admin   | `admin@edusub.ch`   | `admin123`   |
 | Teacher | `teacher@edusub.ch` | `teacher123` |
 
-> **Security note:** These credentials are intended for local development and first-run demos only. Change them immediately in any non-throwaway deployment — log in as the admin, create new accounts, and remove or update the seeded ones.
+> **Security note:** These credentials are intended for local development and first-run demos only. Change them immediately in any non-throwaway deployment. Log in as the admin, create new accounts, and remove or update the seeded ones.
 
 ---
 
@@ -622,11 +622,24 @@ The first time the app starts, two accounts are seeded automatically:
 
 > 🚧 Describe the usage of the main functions
 
-Order Pizza:
-1. Open the menu page and browse pizzas.
-2. Add items (with quantities) to the current order.
-3. Review total (incl. discounts) and validate inputs.
-4. Checkout to persist the order and generate the invoice.
+Usage (Documentation Steps)
+1. Open the EduSub application in the browser
+2. Register a new account or log in with existing credentials
+3. Navigate through the dashboard based on your role
+4. Use the available features such as creating requests or applying for assignments
+
+Admin: Approve Application
+1. Teacher applies for an open request
+2. Admin sees application in “Pending Applications” section
+3. Click on teacher’s personal number to view profile and documents
+4. Click “Approve” -> request status changes to FILLED, teacher sees confirmed assignment
+
+Teacher: Apply for Assignment
+1. Log in with teacher credentials
+2. Browse open assignments in “Available Assignments” tab
+3. Filter by educational level (KG / Primary) if needed
+4. Click “Apply” -> application sent to admin for review
+5. Check “My Assignments” tab after admin approval
 
 > 🚧 Add UI screenshots of the main screens (or a short video link):
 
