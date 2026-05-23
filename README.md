@@ -4,7 +4,7 @@
 
 ![UI Showcase](docs/ui-images/ui_showcase.png)
 
-![Main Screen](docs/main_screen.png)
+![Main Screen](docs/ui-images/main_screen.png)
 
 EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
 ---
@@ -298,7 +298,7 @@ Manages users, roles, schools, and monitors system activity.
 
 ### Wireframes / Mockups
 
-![Wireframes / Mockups](docs/edusub_wireframes_mockups.png)
+![Wireframes / Mockups](docs/ui-images/edusub_wireframes_mockups.png)
 
 ---
 
