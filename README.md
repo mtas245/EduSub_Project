@@ -298,10 +298,7 @@ Manages users, roles, schools, and monitors system activity.
 
 ### Wireframes / Mockups
 
-> 🚧 Add screenshots of the wireframe mockups you chose to implement.
-
-![Wireframe – Home](docs/ui-images/wireframe_home.png)
-![Wireframe – Checkout](docs/ui-images/wireframe_checkout.png)
+![Wireframes / Mockups](docs/edusub_wireframes_mockups.png)
 
 ---
 
