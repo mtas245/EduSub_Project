@@ -313,7 +313,38 @@ def test_get_approved_assignments_for_teacher(db, admin_user, teacher_user, subj
     assert len(assignments) == 1
     assert assignments[0].subject_id == subject_math.id
     
-                                            
+def test_calculate_expires_at_without_time_slot(service):
+    """calculate_expires_at uses midnight minus 12h when no time_slot given."""
+    from datetime import date, datetime
+    result = service.calculate_expires_at(date(2026, 6, 1), time_slot=None)
+    expected = datetime(2026, 5, 31, 12, 0)
+    assert result == expected
+
+
+def test_delete_expired_requests_handles_exception(db, admin_user, subject_math, service):
+    """delete_expired_requests returns 0 on exception by using invalid state."""
+    from unittest.mock import patch
+    with patch.object(db, 'exec', side_effect=Exception('DB Error')):
+        result = service.delete_expired_requests()
+    assert result == 0
+
+
+def test_approve_application_not_found(service):
+    """approve_application returns False for unknown app_id."""
+    assert service.approve_application(9999) is False
+
+def test_reject_application_not_found(service):
+    """reject_application returns False for unknown app_id."""
+    assert service.reject_application(9999) is False
+
+def test_calculate_expires_at_no_time_slot_direct(service):
+    """Direct call to calculate_expires_at with time_slot=None hits else branch."""
+    from datetime import date, datetime, time
+    assignment_date = date(2026, 7, 1)
+    result = service.calculate_expires_at(assignment_date, None)
+    # Without time_slot, start_time = 00:00, so expires = day before at 12:00
+    assert result == datetime(2026, 6, 30, 12, 0, 0)
+
 
             
     

@@ -244,3 +244,9 @@ def test_reject_teacher_success(db):
     result = service.reject_teacher(tid)
     assert result is True
     assert db.get(User, tid) is None
+
+def test_login_user_not_approved(db):
+    """Teacher not approved returns None on login."""
+    register_user(db, 'notapproved@test.com', 'Not Approved', 'pass123', 'teacher')
+    result = login_user(db, 'notapproved@test.com', 'pass123')
+    assert result is None
