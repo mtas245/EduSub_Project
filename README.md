@@ -4,6 +4,8 @@
 
 ![UI Showcase](docs/ui-images/ui_showcase.png)
 
+![Main Screen](docs/ui-images/main_screen.png)
+
 EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
 ---
 
@@ -296,10 +298,7 @@ Manages users, roles, schools, and monitors system activity.
 
 ### Wireframes / Mockups
 
-> 🚧 Add screenshots of the wireframe mockups you chose to implement.
-
-![Wireframe – Home](docs/ui-images/wireframe_home.png)
-![Wireframe – Checkout](docs/ui-images/wireframe_checkout.png)
+![Wireframes / Mockups](docs/ui-images/edusub_wireframes_mockups.png)
 
 ---
 
@@ -538,7 +537,7 @@ edusub/
 
 **Role guards as decorators.** Access control lives in `app/auth/guards.py` as `@require_login` and `@require_admin` decorators applied at the page handler level. This keeps authorization logic out of business code and makes it impossible to register a protected route without explicitly declaring its required role.
 
-**Two-step approval workflow.** Teachers create requests in `pending` state; only an admin can transition them to `approved` or `rejected`. Once decided, a request is immutable — `decided_at` and `decided_by` are stamped, and the status field is locked. This produces a clean audit trail without needing a separate history table.
+**Two-step approval workflow.** Teachers create requests in `pending` state; only an admin can transition them to `approved` or `rejected`. Once decided, a request is immutable, `decided_at` and `decided_by` are stamped, and the status field is locked. This produces a clean audit trail without needing a separate history table.
 
 **Automatic expiry.** Each request carries an `expires_at` timestamp (defaulting to the requested date itself). The approvals page filters out expired pending requests so admins are never shown stale items, and an expired request can no longer be approved even via a crafted URL.
 
@@ -612,7 +611,7 @@ The first time the app starts, two accounts are seeded automatically:
 | Admin   | `admin@edusub.ch`   | `admin123`   |
 | Teacher | `teacher@edusub.ch` | `teacher123` |
 
-> **Security note:** These credentials are intended for local development and first-run demos only. Change them immediately in any non-throwaway deployment — log in as the admin, create new accounts, and remove or update the seeded ones.
+> **Security note:** These credentials are intended for local development and first-run demos only. Change them immediately in any non-throwaway deployment. Log in as the admin, create new accounts, and remove or update the seeded ones.
 
 ---
 
@@ -620,11 +619,24 @@ The first time the app starts, two accounts are seeded automatically:
 
 > 🚧 Describe the usage of the main functions
 
-Order Pizza:
-1. Open the menu page and browse pizzas.
-2. Add items (with quantities) to the current order.
-3. Review total (incl. discounts) and validate inputs.
-4. Checkout to persist the order and generate the invoice.
+Usage (Documentation Steps)
+1. Open the EduSub application in the browser
+2. Register a new account or log in with existing credentials
+3. Navigate through the dashboard based on your role
+4. Use the available features such as creating requests or applying for assignments
+
+Admin: Approve Application
+1. Teacher applies for an open request
+2. Admin sees application in “Pending Applications” section
+3. Click on teacher’s personal number to view profile and documents
+4. Click “Approve” -> request status changes to FILLED, teacher sees confirmed assignment
+
+Teacher: Apply for Assignment
+1. Log in with teacher credentials
+2. Browse open assignments in “Available Assignments” tab
+3. Filter by educational level (KG / Primary) if needed
+4. Click “Apply” -> application sent to admin for review
+5. Check “My Assignments” tab after admin approval
 
 > 🚧 Add UI screenshots of the main screens (or a short video link):
 
@@ -666,38 +678,38 @@ Tests run against an **in-memory SQLite database** seeded fresh for each test, s
 
 **`tests/test_auth.py`**
 
-- `test_password_hash_is_not_plaintext` — confirms bcrypt is applied and the stored hash never equals the input password.
-- `test_password_verify_accepts_correct_password` — `verify(password, hash)` returns `True` for the original password.
-- `test_password_verify_rejects_wrong_password` — `verify` returns `False` for any other input.
-- `test_login_with_valid_credentials` — submitting correct credentials returns a session and redirects to `/dashboard`.
-- `test_login_with_wrong_password_fails` — wrong password yields an error message and no session.
-- `test_login_with_unknown_email_fails` — unregistered email yields a generic auth error (no user enumeration).
-- `test_require_login_redirects_anonymous` — protected pages send anonymous visitors back to `/login`.
-- `test_require_admin_blocks_teacher` — a teacher hitting `/approvals` receives 403 / forbidden page.
-- `test_require_admin_allows_admin` — an admin hitting `/approvals` is served normally.
-- `test_logout_clears_session` — after logout, the previous session can no longer reach protected pages.
+- `test_password_hash_is_not_plaintext` -> confirms bcrypt is applied and the stored hash never equals the input password.
+- `test_password_verify_accepts_correct_password` -> `verify(password, hash)` returns `True` for the original password.
+- `test_password_verify_rejects_wrong_password` -> `verify` returns `False` for any other input.
+- `test_login_with_valid_credentials` -> submitting correct credentials returns a session and redirects to `/dashboard`.
+- `test_login_with_wrong_password_fails` -> wrong password yields an error message and no session.
+- `test_login_with_unknown_email_fails` -> unregistered email yields a generic auth error (no user enumeration).
+- `test_require_login_redirects_anonymous` -> protected pages send anonymous visitors back to `/login`.
+- `test_require_admin_blocks_teacher` -> a teacher hitting `/approvals` receives 403 / forbidden page.
+- `test_require_admin_allows_admin` -> an admin hitting `/approvals` is served normally.
+- `test_logout_clears_session` -> after logout, the previous session can no longer reach protected pages.
 
 **`tests/test_requests.py`**
 
-- `test_create_request_succeeds_with_valid_input` — teacher creates a well-formed request and it appears in `my_requests` with status `pending`.
-- `test_create_request_rejects_past_date` — submitting a date in the past raises a validation error.
-- `test_create_request_requires_subject` — empty subject field is rejected.
-- `test_create_request_requires_reason` — empty reason field is rejected.
-- `test_duplicate_request_same_date_period_blocked` — second submission for the same `(date, period)` is refused while the first is still pending or approved.
-- `test_duplicate_allowed_after_rejection` — after the first request is rejected, the teacher can submit a fresh one for the same slot.
-- `test_my_requests_only_shows_own` — teacher A cannot see teacher B's requests on `/requests/mine`.
-- `test_expired_request_not_shown_in_approvals` — a pending request whose `expires_at` has passed is hidden from the admin queue.
+- `test_create_request_succeeds_with_valid_input` -> teacher creates a well-formed request and it appears in `my_requests` with status `pending`.
+- `test_create_request_rejects_past_date` -> submitting a date in the past raises a validation error.
+- `test_create_request_requires_subject` -> empty subject field is rejected.
+- `test_create_request_requires_reason` -> empty reason field is rejected.
+- `test_duplicate_request_same_date_period_blocked` -> second submission for the same `(date, period)` is refused while the first is still pending or approved.
+- `test_duplicate_allowed_after_rejection` -> after the first request is rejected, the teacher can submit a fresh one for the same slot.
+- `test_my_requests_only_shows_own` -> teacher A cannot see teacher B's requests on `/requests/mine`.
+- `test_expired_request_not_shown_in_approvals` -> a pending request whose `expires_at` has passed is hidden from the admin queue.
 
 **`tests/test_admin.py`**
 
-- `test_admin_sees_pending_requests` — `/approvals` lists all non-expired pending requests across all teachers.
-- `test_approve_request_sets_status_and_audit` — approving stamps `status=approved`, `decided_at`, and `decided_by`.
-- `test_reject_request_sets_status_and_audit` — rejecting stamps `status=rejected`, `decided_at`, and `decided_by`.
-- `test_cannot_approve_already_decided_request` — a second decision on the same request is refused.
-- `test_cannot_approve_expired_request` — attempting to approve a request past its `expires_at` is refused even via a direct URL.
-- `test_teacher_cannot_access_approvals_route` — a logged-in teacher hitting `/approvals` receives forbidden.
-- `test_admin_can_create_new_user` — admin creates a teacher account via `/users/new` and the new user can log in.
-- `test_create_user_rejects_duplicate_email` — creating a second user with an existing email is refused.
+- `test_admin_sees_pending_requests` -> `/approvals` lists all non-expired pending requests across all teachers.
+- `test_approve_request_sets_status_and_audit` -> approving stamps `status=approved`, `decided_at`, and `decided_by`.
+- `test_reject_request_sets_status_and_audit` -> rejecting stamps `status=rejected`, `decided_at`, and `decided_by`.
+- `test_cannot_approve_already_decided_request` -> a second decision on the same request is refused.
+- `test_cannot_approve_expired_request` -> attempting to approve a request past its `expires_at` is refused even via a direct URL.
+- `test_teacher_cannot_access_approvals_route` -> a logged-in teacher hitting `/approvals` receives forbidden.
+- `test_admin_can_create_new_user` -> admin creates a teacher account via `/users/new` and the new user can log in.
+- `test_create_user_rejects_duplicate_email` -> creating a second user with an existing email is refused.
 
 ---
 
