@@ -89,7 +89,7 @@ def test_register_user_with_documents_path(db):
 
 def test_login_user_success(db):
     """Correct credentials return the user."""
-    register_user(db, 'login@test.com', 'Login User', 'mypassword', 'teacher')
+    register_user(db, 'login@test.com', 'Login User', 'mypassword', 'admin')
     user = login_user(db, 'login@test.com', 'mypassword')
     assert user is not None
     assert user.email == 'login@test.com'
@@ -171,3 +171,76 @@ def test_set_subjects_empty_clears_all(db, teacher, subject_math, service):
     service.set_subjects(teacher.id, [])
     assert service.get_subjects(teacher.id) == []
 
+def test_get_pending_teachers(db):
+    """get_pending_teachers returns only unapproved teachers."""
+    teacher = User(email='pending@test.com', password_hash='x',
+                   full_name='Pending', role=Role.TEACHER,
+                   personal_number='LP-2026-9001', is_approved=False)
+    db.add(teacher)
+    db.commit()
+    service = ProfileService(db)
+    pending = service.get_pending_teachers()
+    assert len(pending) >= 1
+    assert all(not u.is_approved for u in pending)
+
+def test_approve_teacher_not_found(db):
+    """approve_teacher returns False for unknown user."""
+    service = ProfileService(db)
+    assert service.approve_teacher(9999) is False
+
+def test_approve_teacher_wrong_role(db):
+    """approve_teacher returns False if user is not a teacher."""
+    admin = User(email='admin99@test.com', password_hash='x',
+                 full_name='Admin', role=Role.ADMIN,
+                 personal_number='LP-2026-9002', is_approved=True)
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    service = ProfileService(db)
+    assert service.approve_teacher(admin.id) is False
+
+def test_reject_teacher_not_found(db):
+    """reject_teacher returns False for unknown user."""
+    service = ProfileService(db)
+    assert service.reject_teacher(9999) is False
+
+
+def test_reject_teacher_wrong_role(db):
+    """reject_teacher returns False if user is not a teacher."""
+    admin = User(email='admin100@test.com', password_hash='x',
+                 full_name='Admin2', role=Role.ADMIN,
+                 personal_number='LP-2026-9003', is_approved=True)
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    service = ProfileService(db)
+    assert service.reject_teacher(admin.id) is False
+
+def test_approve_teacher_success(db):
+    """approve_teacher sets is_approved to True for a teacher."""
+    teacher = User(email='approve@test.com', password_hash='x',
+                   full_name='To Approve', role=Role.TEACHER,
+                   personal_number='LP-2026-9004', is_approved=False)
+    db.add(teacher)
+    db.commit()
+    db.refresh(teacher)
+    service = ProfileService(db)
+    result = service.approve_teacher(teacher.id)
+    assert result is True
+    db.refresh(teacher)
+    assert teacher.is_approved is True
+
+
+def test_reject_teacher_success(db):
+    """reject_teacher deletes the teacher account."""
+    teacher = User(email='reject@test.com', password_hash='x',
+                   full_name='To Reject', role=Role.TEACHER,
+                   personal_number='LP-2026-9005', is_approved=False)
+    db.add(teacher)
+    db.commit()
+    db.refresh(teacher)
+    tid = teacher.id
+    service = ProfileService(db)
+    result = service.reject_teacher(tid)
+    assert result is True
+    assert db.get(User, tid) is None
