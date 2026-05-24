@@ -920,8 +920,6 @@ Tests run against an **in-memory SQLite database** seeded fresh for each test, s
 pytest
 ```
 
-> 🚧 If you provide separate commands, document them here (e.g. `pytest -m integration`).
-
 ---
 
 ### Libraries Used
@@ -936,8 +934,6 @@ pytest
 
 ---
 
-> 🚧 Fill in the names of all team members and describe their individual contributions below.
-
 | Name      | Contribution |
 |-----------|--------------|
 | Ata Erduran | application.py, application_service, teacher_dashboard.py, profile_service.py, profile.py, main.py, test_e2e.py, README.md |
@@ -949,9 +945,6 @@ pytest
 ## 🤝 Contributing
 
 ---
-
-> 🚧 This is a template repository for student projects.  
-> 🚧 Do not change this section in your final submission.
 
 - Use this repository as a starting point by importing it into your own GitHub account
 - Work only within your own copy — do not push to the original template
