@@ -21,7 +21,7 @@ def register_page():
                 ui.label('EduSub').classes('text-lg font-bold text-blue-700')
 
             ui.label('Create your account').classes('text-2xl font-bold text-gray-800 mb-1')
-            ui.label('Join the substiute teacher platform').classes(
+            ui.label('Join the substitute teacher platform').classes(
                 'text-sm text-gray-400 mb-5')
             
             name_input = ui.input('Full Name', placeholder='Jane Teacher').classes('w-full mb-1').props('outlined dense required')
