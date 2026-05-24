@@ -687,7 +687,7 @@ The automated tests fully cover the core business logic of the application, incl
 - Service layer functionality
 - Integration between services and database models
 
-### How to run
+### How to Run
 
 ```bash
 # Run all tests
@@ -909,17 +909,6 @@ Tests run against an **in-memory SQLite database** seeded fresh for each test, s
 | Status | Pass |
 | Comments | Scheduling conflicts are prevented |
 
-
-**Types:**
-- **Unit tests:** password hashing, request creation, request status changes, duplicate application prevention, grade/request filtering
-- **Database tests:** ORM mappings, saving and retrieving users, substitute requests, applications, and subjects in a test SQLite database
-- **Integration tests:** full substitute workflow from request creation to teacher application and admin approval, including status updates and duplicate application handling
-
-**Run:**
-```bash
-pytest
-```
-
 ---
 
 ### Libraries Used
@@ -936,9 +925,9 @@ pytest
 
 | Name      | Contribution |
 |-----------|--------------|
-| Ata Erduran | application.py, teacher_dashboard.py, profile_service.py, profile.py, main.py, test_e2e.py, README.md |
-| Ahmet Iyidogan | database.py, user.py, auth.py, login.py, subject.py, request.py, register.py, main.py, README.md |
-| Mert Kirtas | request.py, request_service.py, admin_dashboard.py, main.py, test_request_service.py |
+| Ata Erduran | models/application.py, models/teacher_dashboard.py, services/profile_service.py, views/profile.py, main.py, tests/test_e2e.py, Readme/Implentation, Readme/Repository Structure, Readme/Routes and access levels, Readme/ORM entities, Readme/Key design decisions, Readme/How to Run, Readme/Default Accounts, Readme/Testing |
+| Ahmet Iyidogan | database.py, models/user.py, auth.py, views/login.py, models/subject.py, models/request.py, views/register.py, main.py, Readme/Intro, Readme/Application Requirements, Readme/User Stories, Readme/Use cases with UML diagram, Readme/Software Architecture,  Readme/Project Requirements, Readme/UI Screenshots upload, Readme/Test Cases|
+| Mert Kirtas | models/request.py, services/request_service.py, views/admin_dashboard.py, main.py, tests/test_request_service.py, models/readme.grading.py, tests/test_application_services.py. tests/test_auth_and_profile.py, tests/test_database.py, tests/test_db.py, tests/test_integration.py, tests/test_request_service.py, tests/test_unit.py, views/admin_teacher_profile.py, Readme/Wireframe_Mockups, Readme/Database and ORM, Readme/Usage  |
 
 ---
 
