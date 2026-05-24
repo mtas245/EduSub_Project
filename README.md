@@ -640,8 +640,32 @@ Teacher: Apply for Assignment
 
 > 🚧 Add UI screenshots of the main screens (or a short video link):
 
-![UI – Menu](docs/ui-images/ui_menu.png)
-![UI – Checkout](docs/ui-images/ui_checkout.png)
+## UI Screenshots
+
+### Create Account
+![Create Account](docs/ui-images/create_account.png)
+
+---
+
+### Available Assignments
+![Available Assignments](docs/ui-images/available_assignments.png)
+
+---
+
+### Accepted Assignments
+![Accepted Assignments](docs/ui-images/accepted_assignments.png)
+
+---
+
+### Admin – Pending Applications
+![Admin Pending Applications](docs/ui-images/admin_pending_applications.png)
+
+---
+
+### Admin – Approve Application
+![Admin Approve Application](docs/ui-images/admin_approve_application.png)
+
+
 
 ---
 
