@@ -1,6 +1,6 @@
 # 🎒 EduSub – Teacher Substitute Management System
 
-![Main Screen](docs/ui-images/main_screen.png)
+![Main Screen](docs/ui-images/main_screen_updated.png)
 
 EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
 ---
