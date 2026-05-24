@@ -936,7 +936,7 @@ pytest
 
 | Name      | Contribution |
 |-----------|--------------|
-| Ata Erduran | application.py, application_service, teacher_dashboard.py, profile_service.py, profile.py, main.py, test_e2e.py, README.md |
+| Ata Erduran | application.py, teacher_dashboard.py, profile_service.py, profile.py, main.py, test_e2e.py, README.md |
 | Ahmet Iyidogan | database.py, user.py, auth.py, login.py, subject.py, request.py, register.py, main.py, README.md |
 | Mert Kirtas | request.py, request_service.py, admin_dashboard.py, main.py, test_request_service.py |
 
