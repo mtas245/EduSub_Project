@@ -1,9 +1,5 @@
 # 🎒 EduSub – Teacher Substitute Management System
 
-> 🚧 Replace the screenshot with one that shows your main screen.
-
-![UI Showcase](docs/ui-images/ui_showcase.png)
-
 ![Main Screen](docs/ui-images/main_screen.png)
 
 EduSub is a browser-based application developed for the course Advanced Programming (BSc BIT, FHNW). The system supports school management in coordinating teacher substitute assignments in case of absence.
@@ -19,12 +15,6 @@ This project is intended to:
 - Use this repository as a starting point by importing it into your own GitHub account  
 - Work only within your own copy — do not push to the original template  
 - Commit regularly to track your progress
-
----
-
-# 🎒 TEMPLATE for documentation
-
-> 🚧 Please remove the paragraphs marked with "🚧". These are comments for preparing the documentation.
 
 ---
 
@@ -235,8 +225,6 @@ When a substitute teacher tries to accept a request, the system checks whether t
 
 ### Use cases
 
-> 🚧 Name actors and briefly describe each use case. Ideally, a UML use case diagram specifies use cases and relationships.
-
 ![UML Use Case Diagram](docs/architecture-diagrams/uml_use_case_diagram.png)
   
 
@@ -304,11 +292,7 @@ Manages users, roles, schools, and monitors system activity.
 
 ## 🏛️ Architecture
 
-> 🚧 Document the architecture components, relationships, and key design decisions.
-
 ### Software Architecture
-
-> 🚧 Insert your UML class diagram(s). Split into multiple diagrams if needed.
 
 ![Architecture Diagram](docs/architecture-diagrams/UML_class_architecture.png)
 
@@ -336,8 +320,6 @@ Manages users, roles, schools, and monitors system activity.
 
 ### 🗄️ Database and ORM
 
-> 🚧 Describe the database and your ORM entities. Ideally, a diagram documents the database and it is described together with the ORM entities.
-
 ![ER Diagram](docs/architecture-diagrams/EduSub_ER.png)
 
 **ORM and Entities:** In the database, substitute requests, users, applications, and subjects are stored and mapped to ORM entities (User, SubstituteRequest, Application, Subject).
@@ -353,8 +335,6 @@ Manages users, roles, schools, and monitors system activity.
 
 ---
 
-> 🚧 Requirements act as a contract: implement and demonstrate each point below.
-
 Each app must meet the following criteria in order to be accepted (see also the official project guidelines PDF on Moodle):
 
 1. Using NiceGUI for building an interactive web app
@@ -364,8 +344,6 @@ Each app must meet the following criteria in order to be accepted (see also the 
 ---
 
 ### 1. Browser-based App (NiceGUI)
-
-> 🚧 In this section, document how your project fulfills each criterion.
 
 EduSub is a fully browser-based web application built with NiceGUI. The browser acts as a thin client, while UI state, routing, session handling, and business logic are handled server-side.
 
@@ -617,8 +595,6 @@ The first time the app starts, two accounts are seeded automatically:
 
 ### Usage (document as steps)
 
-> 🚧 Describe the usage of the main functions
-
 Usage (Documentation Steps)
 1. Open the EduSub application in the browser
 2. Register a new account or log in with existing credentials
@@ -637,8 +613,6 @@ Teacher: Apply for Assignment
 3. Filter by educational level (KG / Primary) if needed
 4. Click “Apply” -> application sent to admin for review
 5. Check “My Assignments” tab after admin approval
-
-> 🚧 Add UI screenshots of the main screens (or a short video link):
 
 ## UI Screenshots
 
@@ -671,9 +645,32 @@ Teacher: Apply for Assignment
 
 ## 🧪 Testing
 
-> 🚧 Explain what you test and how to run tests.
+![Test Coverage](docs/test-images/test_coverage.png)
 
-![Test Coverage](docs/test-images/Bild.png)
+### Why Views and `main.py` Are Not Unit-Tested
+
+NiceGUI views (`views/`) and `main.py` cannot be unit-tested directly because they require a running browser session and web server.
+
+NiceGUI dynamically creates UI components in the browser using WebSockets, meaning UI elements cannot be instantiated or asserted without a live browser environment.
+
+Testing these components would require browser automation or end-to-end testing frameworks such as:
+
+- Playwright
+- Selenium
+
+Setting up and maintaining these tests is significantly more complex and was outside the scope of this course project.
+
+### What Is Tested
+
+The automated tests fully cover the core business logic of the application, including:
+
+- Authentication and login functionality
+- Request validation
+- Database operations using SQLModel
+- Assignment workflows
+- Application approval and rejection logic
+- Service layer functionality
+- Integration between services and database models
 
 ### How to run
 
