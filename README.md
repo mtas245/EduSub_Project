@@ -425,48 +425,63 @@ The persistence layer uses `SessionLocal` for database sessions and service clas
 ### 📂 Repository Structure
 
 ```text
-edusub/
-├── main.py                     # Entry point: starts NiceGUI server on :8080
-├── requirements.txt            # Pinned Python dependencies
-├── edusub.db                   # SQLite database (auto-created on first run)
+FHNW_Advanced_Programming/
+├── main.py
+├── auth.py
+├── database.py
+├── requirements.txt
+├── Procfile
 │
-├── app/
-│   ├── __init__.py             # Marks app/ as a package
-│   ├── config.py               # Settings: port, DB URL, session lifetime
-│   ├── database.py             # SQLModel engine, session helper, init_db()
-│   ├── seed.py                 # Inserts default admin and teacher on first boot
-│   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── user.py             # User ORM: id, email, password_hash, role
-│   │   └── request.py          # SubstitutionRequest ORM: dates, status, etc.
-│   │
-│   ├── auth/
-│   │   ├── __init__.py
-│   │   ├── hashing.py          # bcrypt hash/verify wrappers
-│   │   ├── session.py          # Login state stored per browser session
-│   │   └── guards.py           # require_login, require_admin decorators
-│   │
-│   ├── pages/
-│   │   ├── __init__.py
-│   │   ├── login.py            # / and /login: credential form
-│   │   ├── dashboard.py        # /dashboard: role-aware landing page
-│   │   ├── new_request.py      # /requests/new: teacher submits a request
-│   │   ├── my_requests.py      # /requests/mine: teacher's own history
-│   │   ├── approvals.py        # /approvals: admin queue (approve/reject)
-│   │   └── users.py            # /users: admin user management
-│   │
-│   └── services/
-│       ├── __init__.py
-│       ├── requests_service.py # Business logic: create, approve, reject
-│       └── users_service.py    # Create users, lookup, role changes
+├── models/
+│   ├── __init__.py
+│   ├── user.py
+│   ├── request.py
+│   ├── application.py
+│   └── subject.py
 │
-└── tests/
-    ├── __init__.py
-    ├── conftest.py             # Shared fixtures: in-memory DB, test client
-    ├── test_auth.py            # Hashing, login flow, role guards
-    ├── test_requests.py        # Request lifecycle and validation rules
-    └── test_admin.py           # Approval workflow and admin-only access
+├── services/
+│   ├── __init__.py
+│   ├── application_service.py
+│   ├── profile_service.py
+│   └── request_service.py
+│
+├── views/
+│   ├── __init__.py
+│   ├── login.py
+│   ├── register.py
+│   ├── admin_dashboard.py
+│   ├── admin_teacher_profile.py
+│   ├── teacher_dashboard.py
+│   └── profile.py
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_unit.py
+│   ├── test_db.py
+│   ├── test_integration.py
+│   ├── test_auth_and_profile.py
+│   ├── test_application_service.py
+│   ├── test_request_service.py
+│   ├── test_database.py
+│   └── test_e2e.py
+│
+└── docs/
+    ├── architecture-diagrams/
+    │   ├── UML_class_architecture.png
+    │   ├── EduSub_ER.png
+    │   └── uml_use_case_diagram.png
+    │
+    ├── ui-images/
+    │   ├── main_screen.png
+    │   ├── edusub_wireframes_mockups.png
+    │   ├── create_account.png
+    │   ├── available_assignments.png
+    │   ├── accepted_assignments.png
+    │   ├── admin_pending_applications.png
+    │   └── admin_approve_application.png
+    │
+    └── test-images/
+        └── test_coverage.png
 ```
 
 ---
